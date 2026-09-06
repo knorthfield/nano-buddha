@@ -16,6 +16,7 @@ and to Apple Health as Mindful Minutes (`HealthWriter.swift`).
 - `scripts/build.sh` — xcodegen + simulator build.
 - `scripts/run.sh` — build, then install and launch on the simulator (`SIM_NAME` env var overrides the device).
 - `scripts/test.sh` — unit tests and UI test.
+- `.zed/tasks.json` (git-ignored, local only) — Zed tasks (Run on simulator, Build, Test) that call the scripts above.
 - `scripts/device.sh <name-or-udid>` — signed build and install on a real iPhone. Needs
   `DEVELOPMENT_TEAM = <team id>` in `Local.xcconfig` (git-ignored; `scripts/env.sh` creates a stub).
 - The scripts set `DEVELOPER_DIR` to /Applications/Xcode.app, so `xcode-select` does not need changing.

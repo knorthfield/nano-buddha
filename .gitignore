@@ -6,3 +6,4 @@ Local.xcconfig
 xcuserdata/
 TODO.md
 FIXME.md
+.zed/
