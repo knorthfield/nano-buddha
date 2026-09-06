@@ -25,7 +25,7 @@ final class SitFlowUITests: XCTestCase {
         app.buttons["Done"].tap()
         XCTAssertTrue(app.buttons["History"].waitForExistence(timeout: 5))
         app.buttons["History"].tap()
-        XCTAssertTrue(app.staticTexts["Hidden growth"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Total"].waitForExistence(timeout: 5))
         add(XCTAttachment(screenshot: app.screenshot()))
     }
 }

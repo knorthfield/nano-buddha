@@ -4,12 +4,14 @@ iPhone meditation timer. SwiftUI, iOS 26+, no third-party packages. The Xcode GU
 Public repo: https://github.com/knorthfield/nano-buddha (MIT).
 
 ## What it does
-The user picks a nominal duration. The real duration is hidden:
-`nominal + growthSeconds + random(-60...60)`. `growthSeconds` rises by 15 s per completed sit
-(`NanoBuddha/Model/DurationPlanner.swift`, `Store.swift`). The sit screen shows no time.
+The user picks a duration on the first run only. After that the start screen shows the intended
+duration and lets the user nudge it by one minute. The intended duration grows by 15 s per
+completed sit (`Store.intendedSeconds`). The real duration adds a hidden `random(-60...60)` s
+(`NanoBuddha/Model/DurationPlanner.swift`). The sit screen shows no time.
 A singing bowl rings at the end (`Bell.swift`: AVAudioPlayer in the foreground, a local
 notification with the same sound if locked). Sessions are saved to `Documents/store.json`
-and to Apple Health as Mindful Minutes (`HealthWriter.swift`).
+(`Store.swift` still reads the old `lastNominalMinutes` + `growthSeconds` keys) and to Apple
+Health as Mindful Minutes (`HealthWriter.swift`).
 
 ## Build and run
 - `project.yml` is the source of truth; `NanoBuddha.xcodeproj` is generated and git-ignored.

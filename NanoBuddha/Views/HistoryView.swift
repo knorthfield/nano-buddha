@@ -8,7 +8,6 @@ struct HistoryView: View {
             Section {
                 LabeledContent("Sits", value: "\(store.sessions.count)")
                 LabeledContent("Total", value: "\(store.totalSeconds / 60) min")
-                LabeledContent("Hidden growth", value: "+\(store.growthSeconds) s")
             }
             Section("Sessions") {
                 ForEach(store.sessions.reversed()) { session in

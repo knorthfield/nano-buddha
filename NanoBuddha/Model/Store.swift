@@ -4,13 +4,15 @@ import Observation
 @Observable
 final class Store {
     private(set) var sessions: [Session] = []
-    private(set) var growthSeconds = 0
-    var lastNominalMinutes = 10 { didSet { save() } }
+    /// The duration the user intends to sit. Grows by 15 s per completed sit.
+    var intendedSeconds = 600 { didSet { save() } }
 
     private struct Snapshot: Codable {
         var sessions: [Session]
-        var growthSeconds: Int
-        var lastNominalMinutes: Int
+        var intendedSeconds: Int?
+        // Legacy keys from before intendedSeconds existed; read only.
+        var lastNominalMinutes: Int?
+        var growthSeconds: Int?
     }
 
     private let fileURL: URL
@@ -26,22 +28,25 @@ final class Store {
     func record(_ session: Session) {
         sessions.append(session)
         if session.completed {
-            growthSeconds += DurationPlanner.growthPerSessionSeconds
+            intendedSeconds += DurationPlanner.growthPerSessionSeconds
         }
         save()
+    }
+
+    func nudge(by seconds: Int) {
+        intendedSeconds = max(60, intendedSeconds + seconds)
     }
 
     private func load() {
         guard let data = try? Data(contentsOf: fileURL),
               let snapshot = try? JSONDecoder().decode(Snapshot.self, from: data) else { return }
         sessions = snapshot.sessions
-        growthSeconds = snapshot.growthSeconds
-        lastNominalMinutes = snapshot.lastNominalMinutes
+        intendedSeconds = snapshot.intendedSeconds
+            ?? (snapshot.lastNominalMinutes ?? 10) * 60 + (snapshot.growthSeconds ?? 0)
     }
 
     private func save() {
-        let snapshot = Snapshot(sessions: sessions, growthSeconds: growthSeconds,
-                                lastNominalMinutes: lastNominalMinutes)
+        let snapshot = Snapshot(sessions: sessions, intendedSeconds: intendedSeconds)
         guard let data = try? JSONEncoder().encode(snapshot) else { return }
         try? data.write(to: fileURL, options: .atomic)
     }

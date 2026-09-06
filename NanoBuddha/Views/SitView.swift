@@ -40,7 +40,7 @@ struct SitView: View {
             VStack {
                 Spacer()
                 Button("End") { finish(completed: false) }
-                    .foregroundStyle(.white.opacity(0.4))
+                    .buttonStyle(.glass)
                     .padding(.bottom, 40)
             }
         }
