@@ -10,6 +10,7 @@ struct DoneView: View {
             Spacer()
             Image(systemName: session.completed ? "checkmark.circle" : "pause.circle")
                 .font(.system(size: 64, weight: .thin))
+                .foregroundStyle(Color.accentColor)
             Text(session.completed ? "Session complete" : "Ended early")
                 .font(.title)
             Text("\(max(1, session.actualSeconds / 60)) minutes")
@@ -24,6 +25,7 @@ struct DoneView: View {
                 .padding(.bottom, 40)
         }
         .padding()
+        .background(Starfield())
         .task { healthStatus = await HealthWriter.save(session) }
     }
 }

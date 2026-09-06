@@ -38,6 +38,11 @@ and to Apple Health as Mindful Minutes (`HealthWriter.swift`).
   `"/Applications/Xcode.app/Contents/Applications/Icon Composer.app/Contents/Executables/ictool"
   NanoBuddha/AppIcon.icon --export-image --output-file out.png --platform iOS --rendition Default
   --width 1024 --height 1024 --scale 1`. `xcrun ictool` is a different binary and does not render.
+- After changing the icon, the simulator's notification banners can keep showing the old icon
+  even after `simctl uninstall`. Restart SpringBoard:
+  `xcrun simctl spawn booted launchctl kickstart -k system/com.apple.SpringBoard`. To see a
+  banner without waiting for a sit, `xcrun simctl push booted com.krisnorthfield.NanoBuddha
+  payload.json` with an `aps` alert (notification permission must already be granted).
 - To debug a failed UI test: `xcrun xcresulttool export attachments --path <xcresult> --output-path <dir>`
   gives a screen recording plus accessibility-hierarchy dumps. Attachments are only kept for
   failing tests.

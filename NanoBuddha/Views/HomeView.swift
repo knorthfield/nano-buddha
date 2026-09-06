@@ -36,6 +36,7 @@ struct HomeView: View {
                 }
             }
             .padding()
+            .background(Starfield(secondsPerTurn: 1200 / Double(store.lastNominalMinutes)))
             .navigationTitle("Nano Buddha")
             .toolbar {
                 NavigationLink("History") { HistoryView() }

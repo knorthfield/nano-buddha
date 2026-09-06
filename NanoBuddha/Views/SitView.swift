@@ -8,25 +8,35 @@ struct SitView: View {
     @State private var start = Date()
     @State private var endDate = Date()
     @State private var breathing = false
+    @State private var highlightTurning = false
     private let tick = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-            ZStack {
-                glow(size: 260, opacity: 0.45)
-                    .offset(x: breathing ? 70 : -70, y: breathing ? -90 : 40)
-                    .animation(.easeInOut(duration: 11).repeatForever(autoreverses: true), value: breathing)
-                glow(size: 200, opacity: 0.3)
-                    .offset(x: breathing ? -80 : 60, y: breathing ? 80 : -50)
-                    .animation(.easeInOut(duration: 17).repeatForever(autoreverses: true), value: breathing)
-                Color.clear
-                    .frame(width: 160, height: 160)
-                    .glassEffect(.clear, in: .circle)
-                    .scaleEffect(breathing ? 1.12 : 1)
-                    .animation(.easeInOut(duration: 6).repeatForever(autoreverses: true), value: breathing)
-            }
-            .accessibilityHidden(true)
+            Starfield()
+            Color.clear
+                .frame(width: 160, height: 160)
+                .glassEffect(.clear.tint(.black.opacity(0.45)), in: .circle)
+                .overlay {
+                    ZStack {
+                        Circle().strokeBorder(
+                            LinearGradient(colors: [.white.opacity(0.8), .clear, .clear, .white.opacity(0.25)],
+                                           startPoint: .topLeading, endPoint: .bottomTrailing),
+                            lineWidth: 1.5)
+                        Ellipse()
+                            .fill(.white.opacity(0.35))
+                            .frame(width: 70, height: 36)
+                            .rotationEffect(.degrees(-35))
+                            .blur(radius: 10)
+                            .offset(x: -30, y: -32)
+                    }
+                    .rotationEffect(.degrees(highlightTurning ? 360 : 0))
+                    .animation(.linear(duration: 90).repeatForever(autoreverses: false), value: highlightTurning)
+                }
+                .scaleEffect(breathing ? 1.08 : 1)
+                .animation(.easeInOut(duration: 6).repeatForever(autoreverses: true), value: breathing)
+                .accessibilityHidden(true)
             VStack {
                 Spacer()
                 Button("End") { finish(completed: false) }
@@ -41,17 +51,11 @@ struct SitView: View {
             Bell.scheduleNotification(at: endDate)
             UIApplication.shared.isIdleTimerDisabled = true
             breathing = !reduceMotion
+            highlightTurning = !reduceMotion
         }
         .onReceive(tick) { now in
             if now >= endDate { finish(completed: true) }
         }
-    }
-
-    private func glow(size: CGFloat, opacity: Double) -> some View {
-        Circle()
-            .fill(RadialGradient(colors: [Color.accentColor.opacity(opacity), .clear],
-                                 center: .center, startRadius: 0, endRadius: size / 2))
-            .frame(width: size, height: size)
     }
 
     private func finish(completed: Bool) {

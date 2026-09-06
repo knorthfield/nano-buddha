@@ -1,18 +1,74 @@
 {
-  "fill": { "linear-gradient": ["srgb:0.86,0.64,0.48,1", "srgb:0.70,0.48,0.34,1"] },
-  "groups": [
+  "fill" : {
+    "linear-gradient" : [
+      "display-p3:0.00000,0.00000,0.00000,1.00000",
+      "srgb:0.15000,0.12000,0.20000,1.00000"
+    ]
+  },
+  "groups" : [
     {
-      "name": "ring",
-      "layers": [
-        { "image-name": "ring.svg", "name": "ring", "glass": true,
-          "position": { "scale": 1, "translation-in-points": [0, 0] } }
+      "blend-mode" : "darken",
+      "blur-material" : 0,
+      "hidden" : false,
+      "layers" : [
+        {
+          "blend-mode" : "normal",
+          "fill" : "automatic",
+          "glass" : true,
+          "image-name" : "hole.svg",
+          "name" : "hole",
+          "opacity" : 1,
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -4.5,
+              -7.5
+            ]
+          }
+        }
       ],
-      "specular": true,
-      "shadow": { "kind": "neutral", "opacity": 0.5 },
-      "translucency": { "enabled": true, "value": 0.5 },
-      "blur-material": 0.5,
-      "lighting": "individual"
+      "lighting" : "individual",
+      "name" : "horizon",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "specular" : true,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0
+      }
+    },
+    {
+      "blur-material" : null,
+      "layers" : [
+        {
+          "glass" : false,
+          "image-name" : "stars.svg",
+          "name" : "stars",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "lighting" : "individual",
+      "name" : "space",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "specular" : false,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
     }
   ],
-  "supported-platforms": { "squares": "shared" }
+  "supported-platforms" : {
+    "squares" : "shared"
+  }
 }

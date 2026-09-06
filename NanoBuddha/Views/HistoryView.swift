@@ -28,6 +28,8 @@ struct HistoryView: View {
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(Starfield())
         .navigationTitle("History")
     }
 }
