@@ -24,3 +24,8 @@ and to Apple Health as Mindful Minutes (`HealthWriter.swift`).
 `NanoBuddha/Resources/bowl.wav` — "Tibetan Bowl Struck #1", BigSoundBank, CC0,
 https://bigsoundbank.com/detail-1110-tibetan-bowl-struck.html, trimmed to 28 s
 (notification sounds must be under 30 s).
+
+## Tests
+- `NanoBuddhaTests` — unit tests for `DurationPlanner` and `Store`.
+- `NanoBuddhaUITests/SitFlowUITests.swift` — launches with `-quickSit` (a 5 s sit), taps Begin,
+  answers the notification and Health prompts, and checks the Done and History screens.

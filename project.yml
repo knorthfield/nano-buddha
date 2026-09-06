@@ -44,15 +44,29 @@ targets:
     settings:
       base:
         SWIFT_VERSION: "5.9"
+        GENERATE_INFOPLIST_FILE: YES
+  NanoBuddhaUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - NanoBuddhaUITests
+    dependencies:
+      - target: NanoBuddha
+    settings:
+      base:
+        SWIFT_VERSION: "5.9"
+        GENERATE_INFOPLIST_FILE: YES
 schemes:
   NanoBuddha:
     build:
       targets:
         NanoBuddha: all
         NanoBuddhaTests: [test]
+        NanoBuddhaUITests: [test]
     run:
       config: Debug
     test:
       config: Debug
       targets:
         - NanoBuddhaTests
+        - NanoBuddhaUITests

@@ -5,5 +5,5 @@ source "$(dirname "$0")/env.sh"
 cd "$ROOT"
 xcodegen generate --quiet
 xcodebuild -project NanoBuddha.xcodeproj -scheme NanoBuddha \
-  -destination "platform=iOS Simulator,name=$SIM_NAME" \
-  -derivedDataPath build CODE_SIGNING_ALLOWED=NO build "$@" | grep -E "error:|warning:|BUILD" || true
+  -destination "platform=iOS Simulator,name=$SIM_NAME,OS=latest" \
+  -derivedDataPath build build "$@" | grep -E "error:|warning:|BUILD" || true

@@ -16,7 +16,9 @@ struct RootView: View {
             HomeView { minutes in
                 let seconds = DurationPlanner.realSeconds(nominalMinutes: minutes,
                                                           growthSeconds: store.growthSeconds)
-                phase = .sitting(plannedSeconds: seconds)
+                // Launch argument used by the UI test so a sit finishes in seconds.
+                let quickSit = ProcessInfo.processInfo.arguments.contains("-quickSit")
+                phase = .sitting(plannedSeconds: quickSit ? 5 : seconds)
             }
         case .sitting(let plannedSeconds):
             SitView(plannedSeconds: plannedSeconds) { session in
