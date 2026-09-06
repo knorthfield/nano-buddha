@@ -34,6 +34,9 @@ and to Apple Health as Mindful Minutes (`HealthWriter.swift`).
 - To debug a failed UI test: `xcrun xcresulttool export attachments --path <xcresult> --output-path <dir>`
   gives a screen recording plus accessibility-hierarchy dumps. Attachments are only kept for
   failing tests.
+- `NanoBuddhaUITests-Runner` stays installed on the simulator after a test run. Tapping its icon
+  crashes at once with `Library not loaded: @rpath/lib_TestingInterop.dylib`. That is expected:
+  only `xcodebuild test` supplies the DYLD paths the runner needs. Not a bug.
 
 ## Assets
 `NanoBuddha/Resources/bowl.wav` — "Tibetan Bowl Struck #1", BigSoundBank, CC0,
