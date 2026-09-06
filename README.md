@@ -8,7 +8,7 @@ after every completed sit. The sit screen shows no time at all, so there is noth
 watch. A singing bowl rings at the end. Each sit is saved locally and written to Apple
 Health as Mindful Minutes.
 
-SwiftUI, iOS 17+, no third-party packages.
+SwiftUI, iOS 26+, no third-party packages.
 
 ## Requirements
 
@@ -30,7 +30,8 @@ Set `SIM_NAME` to use a different simulator, for example `SIM_NAME="iPhone 17 Pr
 
 ## Run on a real iPhone
 
-1. Create `Local.xcconfig` in the repo root with `DEVELOPMENT_TEAM = <your team id>`.
+1. The scripts create `Local.xcconfig` in the repo root. Uncomment `DEVELOPMENT_TEAM` there
+   and set it to your team ID (Apple Developer > Membership).
 2. Pair the phone with your Mac once.
 3. `scripts/device.sh` lists paired devices; `scripts/device.sh "<device name>"` builds,
    installs, and launches.

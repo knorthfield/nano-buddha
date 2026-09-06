@@ -1,6 +1,6 @@
 # Nano Buddha
 
-iPhone meditation timer. SwiftUI, iOS 17+, no third-party packages. The Xcode GUI is never opened.
+iPhone meditation timer. SwiftUI, iOS 26+, no third-party packages. The Xcode GUI is never opened.
 Public repo: https://github.com/knorthfield/nano-buddha (MIT).
 
 ## What it does
@@ -17,7 +17,7 @@ and to Apple Health as Mindful Minutes (`HealthWriter.swift`).
 - `scripts/run.sh` — build, then install and launch on the simulator (`SIM_NAME` env var overrides the device).
 - `scripts/test.sh` — unit tests and UI test.
 - `scripts/device.sh <name-or-udid>` — signed build and install on a real iPhone. Needs
-  `DEVELOPMENT_TEAM = <team id>` in `Local.xcconfig` (git-ignored).
+  `DEVELOPMENT_TEAM = <team id>` in `Local.xcconfig` (git-ignored; `scripts/env.sh` creates a stub).
 - The scripts set `DEVELOPER_DIR` to /Applications/Xcode.app, so `xcode-select` does not need changing.
 - Screenshots: `xcrun simctl io booted screenshot shot.png`.
 
@@ -29,8 +29,14 @@ and to Apple Health as Mindful Minutes (`HealthWriter.swift`).
 - Two simulators can share the name "iPhone 17" (one per runtime). The scripts pass `OS=latest`
   to pick the newest one.
 - Every test target needs `GENERATE_INFOPLIST_FILE: YES` in `project.yml` or signing fails.
-- The app icon PNG must be exactly 1024x1024. Rendering it with AppKit on a Retina Mac
-  produces 2048x2048; fix with `sips -z 1024 1024`.
+- xcodegen does not set `ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME`; without it in `project.yml`
+  `Color.accentColor` is system blue, not the tan `AccentColor` colorset.
+- The app icon is `NanoBuddha/AppIcon.icon`, a hand-written Icon Composer bundle (`icon.json`
+  plus `Assets/ring.svg`). Do not add an `AppIcon.appiconset` next to it: two `AppIcon` assets
+  conflict, and Xcode makes the flat fallbacks itself. Preview it with
+  `"/Applications/Xcode.app/Contents/Applications/Icon Composer.app/Contents/Executables/ictool"
+  NanoBuddha/AppIcon.icon --export-image --output-file out.png --platform iOS --rendition Default
+  --width 1024 --height 1024 --scale 1`. `xcrun ictool` is a different binary and does not render.
 - To debug a failed UI test: `xcrun xcresulttool export attachments --path <xcresult> --output-path <dir>`
   gives a screen recording plus accessibility-hierarchy dumps. Attachments are only kept for
   failing tests.

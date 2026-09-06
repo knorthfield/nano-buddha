@@ -1,0 +1,18 @@
+{
+  "fill": { "linear-gradient": ["srgb:0.86,0.64,0.48,1", "srgb:0.70,0.48,0.34,1"] },
+  "groups": [
+    {
+      "name": "ring",
+      "layers": [
+        { "image-name": "ring.svg", "name": "ring", "glass": true,
+          "position": { "scale": 1, "translation-in-points": [0, 0] } }
+      ],
+      "specular": true,
+      "shadow": { "kind": "neutral", "opacity": 0.5 },
+      "translucency": { "enabled": true, "value": 0.5 },
+      "blur-material": 0.5,
+      "lighting": "individual"
+    }
+  ],
+  "supported-platforms": { "squares": "shared" }
+}

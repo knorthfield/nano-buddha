@@ -8,6 +8,9 @@ DEVICE="${1:-}"
 if [ -z "$DEVICE" ]; then
   echo "Paired devices:"; xcrun devicectl list devices; echo "Usage: $0 <name-or-udid>"; exit 1
 fi
+if ! grep -qE '^[[:space:]]*DEVELOPMENT_TEAM[[:space:]]*=' Local.xcconfig; then
+  echo "Set DEVELOPMENT_TEAM = <team id> in Local.xcconfig (Apple Developer > Membership)."; exit 1
+fi
 xcodegen generate --quiet
 xcodebuild -project NanoBuddha.xcodeproj -scheme NanoBuddha \
   -destination 'generic/platform=iOS' -allowProvisioningUpdates \
