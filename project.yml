@@ -1,0 +1,58 @@
+name: NanoBuddha
+options:
+  bundleIdPrefix: com.krisnorthfield
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+configFiles:
+  Debug: Local.xcconfig
+  Release: Local.xcconfig
+targets:
+  NanoBuddha:
+    type: application
+    platform: iOS
+    sources:
+      - NanoBuddha
+    info:
+      path: NanoBuddha/Info.plist
+      properties:
+        CFBundleDisplayName: Nano Buddha
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        NSHealthUpdateUsageDescription: Nano Buddha saves your meditation minutes to Health as Mindful Minutes.
+        NSHealthShareUsageDescription: Nano Buddha saves your meditation minutes to Health as Mindful Minutes.
+    entitlements:
+      path: NanoBuddha/NanoBuddha.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
+    settings:
+      base:
+        SWIFT_VERSION: "5.9"
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: NO
+  NanoBuddhaTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - NanoBuddhaTests
+    dependencies:
+      - target: NanoBuddha
+    settings:
+      base:
+        SWIFT_VERSION: "5.9"
+schemes:
+  NanoBuddha:
+    build:
+      targets:
+        NanoBuddha: all
+        NanoBuddhaTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - NanoBuddhaTests
