@@ -88,6 +88,8 @@ targets:
       - NanoBuddha/Model/Bell.swift
       - NanoBuddha/Model/Sit.swift
       - NanoBuddha/Model/Sync.swift
+      - NanoBuddha/Model/BeginSitIntent.swift
+      - NanoBuddha/Model/AppShortcuts.swift
       - NanoBuddha/Views/PrimaryButton.swift
       - NanoBuddha/Resources/bowl.wav
       - NanoBuddha/Resources/Assets.xcassets

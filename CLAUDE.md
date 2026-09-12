@@ -23,7 +23,11 @@ circular/rectangular/inline) with the intended minutes and the last 7 days, and 
 button "Begin sit" (`BeginSitIntent`, `openAppWhenRun`). The intent writes a timestamp file
 `sitRequest` in the app group; `RootView` consumes it on scene activation or on
 `SitRequest.didPost` and starts a sit. (A flag in app-group `UserDefaults` lost writes on the
-simulator, hence the file.) The store calls `WidgetCenter.reloadAllTimelines()` on every save.
+simulator, hence the file.) `Model/AppShortcuts.swift` registers the same intent as an App
+Shortcut, so Siri ("Begin a sit in Nano Buddha"), Spotlight, the Shortcuts app and the Action
+button can begin a sit on the iPhone and the watch (`WatchRootView` consumes the request the
+same way). The provider is compiled into the two apps only, not the widget extension or the TV.
+The store calls `WidgetCenter.reloadAllTimelines()` on every save.
 `NanoBuddhaWatch` is the Apple Watch app (single-target, embedded under `Watch/` in the iOS
 bundle, bundle id `com.krisnorthfield.NanoBuddha.watchkitapp`). It runs the same sit through the
 shared `Sit` model (`Model/Sit.swift`: settling silence, opening bell, target bell, End). Bells

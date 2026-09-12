@@ -6,7 +6,8 @@ You choose a nominal duration, say 10 minutes. The app never times exactly that.
 random offset of up to one minute either way, and a hidden base that grows by 15 seconds
 after every completed sit. The sit screen shows no time at all, so there is nothing to
 watch. A singing bowl rings when the time is up, and the sit carries on until you end it.
-Each sit is saved locally and written to Apple Health as Mindful Minutes.
+Each sit is saved locally and written to Apple Health as Mindful Minutes. A sit can also be
+started from a widget, Control Centre, Siri ("Begin a sit in Nano Buddha") or the Shortcuts app.
 
 SwiftUI, iOS 26+ (watchOS 26 and tvOS 26 for the watch and TV apps), no third-party packages.
 
