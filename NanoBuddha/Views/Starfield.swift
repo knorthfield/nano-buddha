@@ -83,7 +83,7 @@ struct Starfield: View {
         let centre = CGPoint(x: size.width / 2, y: size.height / 2)
         let coreRadius = size.width * 0.07
         drawGlow(in: &context, at: centre, radius: coreRadius, tint: Color.accentColor.opacity(0.18))
-        for _ in 0..<40 {
+        for _ in 0..<60 {
             let direction = Double.random(in: 0...(2 * .pi), using: &generator)
             let distance = coreRadius * sqrt(CGFloat.random(in: 0...1, using: &generator))
             let point = CGPoint(x: centre.x + cos(direction) * distance, y: centre.y + sin(direction) * distance)
