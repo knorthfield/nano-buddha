@@ -1,16 +1,15 @@
 import SwiftUI
 
-struct HomeView: View {
+struct WatchHomeView: View {
     @Environment(Store.self) private var store
+    @AppStorage(Bell.soundKey) private var soundOn = false
     let onStart: () -> Void
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 32) {
-                Spacer()
+        ScrollView {
+            VStack(spacing: 12) {
                 if store.sessions.isEmpty {
                     Text("How long will you sit?")
-                        .font(.title2)
                     Picker("Minutes", selection: Binding(
                         get: { store.intendedSeconds / 60 },
                         set: { store.intendedSeconds = $0 * 60 }
@@ -19,35 +18,26 @@ struct HomeView: View {
                             Text("\(minutes) min").tag(minutes)
                         }
                     }
-                    .pickerStyle(.wheel)
-                    .frame(height: 160)
+                    .frame(height: 60)
                 } else {
-                    HStack(spacing: 24) {
-                        Button { store.nudge(by: -60) } label: { Image(systemName: "minus").frame(width: 24, height: 24) }
+                    HStack(spacing: 12) {
+                        Button { store.nudge(by: -60) } label: { Image(systemName: "minus") }
                             .accessibilityLabel("One minute less")
                             .disabled(store.intendedSeconds <= 60)
                         Text(store.intendedTimeText)
-                            .font(.title)
+                            .font(.title3)
                             .monospacedDigit()
-                        Button { store.nudge(by: 60) } label: { Image(systemName: "plus").frame(width: 24, height: 24) }
+                        Button { store.nudge(by: 60) } label: { Image(systemName: "plus") }
                             .accessibilityLabel("One minute more")
                     }
                     .buttonStyle(.glass)
                     .buttonBorderShape(.circle)
                 }
                 PrimaryButton(title: "Begin", action: onStart)
-                Spacer()
-                if !store.sessions.isEmpty {
-                    Text("\(store.sessions.count) sits · \(store.totalSeconds / 60) minutes")
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .padding()
-            .background(Starfield(secondsPerTurn: 72_000 / Double(store.intendedSeconds)))
-            .navigationTitle("Nano Buddha")
-            .toolbar {
-                NavigationLink("History") { HistoryView() }
+                Toggle("Sound", isOn: $soundOn)
+                    .padding(.horizontal, 8)
             }
         }
+        .navigationTitle("Nano Buddha")
     }
 }

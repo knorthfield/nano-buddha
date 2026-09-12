@@ -6,12 +6,9 @@ struct SitView: View {
     let onFinish: (Session) -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var sitStart = Date()
-    @State private var endDate = Date()
+    @State private var sit = Sit()
     @State private var breathing = false
     @State private var highlightTurning = false
-    @State private var openingRung = false
-    @State private var targetRung = false
     private let tick = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -47,42 +44,16 @@ struct SitView: View {
         }
         .statusBarHidden()
         .onAppear {
-            sitStart = Date().addingTimeInterval(TimeInterval(settlingSeconds))
-            endDate = sitStart.addingTimeInterval(TimeInterval(plannedSeconds))
-            Bell.scheduleNotification(for: .opening, at: sitStart)
-            Bell.scheduleNotification(for: .target, at: endDate)
+            sit.start(settlingSeconds: settlingSeconds, plannedSeconds: plannedSeconds)
             UIApplication.shared.isIdleTimerDisabled = true
             breathing = !reduceMotion
             highlightTurning = !reduceMotion
         }
-        .onReceive(tick) { now in
-            if now >= sitStart && !openingRung {
-                openingRung = true
-                ring(.opening, due: sitStart, now: now)
-            }
-            if now >= endDate && !targetRung {
-                targetRung = true
-                ring(.target, due: endDate, now: now)
-            }
-        }
-    }
-
-    /// The opening bell marks the start of the sit after the settling silence; the target bell
-    /// marks the target. The sit carries on until the user taps End.
-    private func ring(_ moment: Bell.Moment, due: Date, now: Date) {
-        Bell.cancelNotification(for: moment)
-        // The timer does not tick while the phone is locked. If the moment passed more than
-        // a couple of seconds ago the notification already rang, so do not ring twice.
-        if now.timeIntervalSince(due) < 2 { Bell.shared.ring() }
+        .onReceive(tick) { now in sit.tick(now: now) }
     }
 
     private func finish() {
         UIApplication.shared.isIdleTimerDisabled = false
-        Bell.cancelNotifications()
-        Bell.shared.stop()
-        let end = Date()
-        // An End during the settling silence records a sit of no length, not a negative one.
-        onFinish(Session(start: min(sitStart, end), end: end, plannedSeconds: plannedSeconds,
-                         completed: end >= endDate))
+        onFinish(sit.finish())
     }
 }

@@ -3,6 +3,7 @@ options:
   bundleIdPrefix: com.krisnorthfield
   deploymentTarget:
     iOS: "26.0"
+    watchOS: "26.0"
   createIntermediateGroups: true
 configFiles:
   Debug: Local.xcconfig
@@ -15,6 +16,8 @@ targets:
       - NanoBuddha
     dependencies:
       - target: NanoBuddhaWidgets
+        embed: true
+      - target: NanoBuddhaWatch
         embed: true
     info:
       path: NanoBuddha/Info.plist
@@ -72,6 +75,47 @@ targets:
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         GENERATE_INFOPLIST_FILE: NO
         SKIP_INSTALL: YES
+  NanoBuddhaWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - NanoBuddhaWatch
+      - NanoBuddha/Model/Store.swift
+      - NanoBuddha/Model/Session.swift
+      - NanoBuddha/Model/DurationPlanner.swift
+      - NanoBuddha/Model/HealthWriter.swift
+      - NanoBuddha/Model/Bell.swift
+      - NanoBuddha/Model/Sit.swift
+      - NanoBuddha/Model/Sync.swift
+      - NanoBuddha/Views/PrimaryButton.swift
+      - NanoBuddha/Resources/bowl.wav
+      - NanoBuddha/Resources/Assets.xcassets
+      - NanoBuddha/AppIcon.icon
+    info:
+      path: NanoBuddhaWatch/Info.plist
+      properties:
+        CFBundleDisplayName: Nano Buddha
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: com.krisnorthfield.NanoBuddha
+        WKRunsIndependentlyOfCompanionApp: true
+        WKBackgroundModes: [mindfulness]
+        NSHealthUpdateUsageDescription: Nano Buddha saves your meditation minutes to Health as Mindful Minutes.
+        NSHealthShareUsageDescription: Nano Buddha saves your meditation minutes to Health as Mindful Minutes.
+    entitlements:
+      path: NanoBuddhaWatch/NanoBuddhaWatch.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
+    settings:
+      base:
+        # Same rule as the widget: the watch app's bundle id must be prefixed by the app's.
+        PRODUCT_BUNDLE_IDENTIFIER: com.krisnorthfield.NanoBuddha.watchkitapp
+        SWIFT_VERSION: "5.9"
+        CODE_SIGN_STYLE: Automatic
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        GENERATE_INFOPLIST_FILE: NO
   NanoBuddhaTests:
     type: bundle.unit-test
     platform: iOS
@@ -100,6 +144,7 @@ schemes:
       targets:
         NanoBuddha: all
         NanoBuddhaWidgets: all
+        NanoBuddhaWatch: all
         NanoBuddhaTests: [test]
         NanoBuddhaUITests: [test]
     run:
@@ -109,3 +154,9 @@ schemes:
       targets:
         - NanoBuddhaTests
         - NanoBuddhaUITests
+  NanoBuddhaWatch:
+    build:
+      targets:
+        NanoBuddhaWatch: all
+    run:
+      config: Debug

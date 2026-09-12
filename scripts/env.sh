@@ -8,3 +8,6 @@ fi
 SIM_NAME="${SIM_NAME:-iPhone 17}"
 BUNDLE_ID="com.krisnorthfield.NanoBuddha"
 APP_PATH="$ROOT/build/Build/Products/Debug-iphonesimulator/NanoBuddha.app"
+WATCH_SIM_NAME="${WATCH_SIM_NAME:-Apple Watch Series 11 (46mm)}"
+WATCH_BUNDLE_ID="com.krisnorthfield.NanoBuddha.watchkitapp"
+WATCH_APP_PATH="$ROOT/build/Build/Products/Debug-watchsimulator/NanoBuddhaWatch.app"

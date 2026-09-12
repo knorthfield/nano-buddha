@@ -43,3 +43,53 @@ final class StoreTests: XCTestCase {
         XCTAssertEqual(week.map(\.start), [sessions[1].start, sessions[0].start])
     }
 }
+
+final class StoreMergeTests: XCTestCase {
+    private func session(secondsAgo: Int) -> Session {
+        let end = Date.now.addingTimeInterval(-Double(secondsAgo))
+        return Session(start: end - 600, end: end, plannedSeconds: 600, completed: true)
+    }
+
+    private func temporaryStore() -> Store {
+        Store(fileURL: FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID()).json"))
+    }
+
+    func testMergeAddsUnseenSitsOldestFirst() {
+        let mine = temporaryStore()
+        let theirs = temporaryStore()
+        let older = session(secondsAgo: 7200)
+        let newer = session(secondsAgo: 60)
+        mine.record(newer)
+        theirs.record(older)
+        theirs.record(newer)
+
+        XCTAssertTrue(mine.merge(theirs.snapshot))
+        XCTAssertEqual(mine.sessions.map(\.id), [older.id, newer.id])
+        XCTAssertFalse(mine.merge(theirs.snapshot), "nothing new the second time")
+    }
+
+    func testMergeTakesTheNewerIntendedDuration() {
+        let mine = temporaryStore()
+        let theirs = temporaryStore()
+        mine.intendedSeconds = 900
+        theirs.intendedSeconds = 1200
+
+        XCTAssertTrue(mine.merge(theirs.snapshot))
+        XCTAssertEqual(mine.intendedSeconds, 1200)
+        XCTAssertFalse(theirs.merge(mine.snapshot), "the older value does not win")
+        XCTAssertEqual(theirs.intendedSeconds, 1200)
+    }
+
+    func testMergeSavesAndTellsTheListener() {
+        let mine = temporaryStore()
+        let theirs = temporaryStore()
+        theirs.record(session(secondsAgo: 0))
+        var saves = 0
+        mine.didSave = { saves += 1 }
+
+        mine.merge(theirs.snapshot)
+        XCTAssertEqual(saves, 1)
+        mine.merge(theirs.snapshot)
+        XCTAssertEqual(saves, 1, "an unchanged merge does not save")
+    }
+}

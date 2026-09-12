@@ -13,7 +13,11 @@ struct PrimaryButton: View {
                 .padding(.vertical, 8)
         }
         .buttonStyle(.glass(.clear.tint(Color("GlassTint"))))
+        #if os(watchOS)
+        .padding(.horizontal, 8)
+        #else
         .padding(.horizontal, 48)
         .frame(maxWidth: 480)
+        #endif
     }
 }

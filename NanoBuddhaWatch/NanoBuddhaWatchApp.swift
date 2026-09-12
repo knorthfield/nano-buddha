@@ -1,12 +1,12 @@
 import SwiftUI
 
 @main
-struct NanoBuddhaApp: App {
+struct NanoBuddhaWatchApp: App {
     @State private var store = Store()
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            WatchRootView()
                 .environment(store)
                 .onAppear { Sync.shared.activate(store: store) }
         }

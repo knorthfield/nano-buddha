@@ -24,6 +24,19 @@ button "Begin sit" (`BeginSitIntent`, `openAppWhenRun`). The intent writes a tim
 `sitRequest` in the app group; `RootView` consumes it on scene activation or on
 `SitRequest.didPost` and starts a sit. (A flag in app-group `UserDefaults` lost writes on the
 simulator, hence the file.) The store calls `WidgetCenter.reloadAllTimelines()` on every save.
+`NanoBuddhaWatch` is the Apple Watch app (single-target, embedded under `Watch/` in the iOS
+bundle, bundle id `com.krisnorthfield.NanoBuddha.watchkitapp`). It runs the same sit through the
+shared `Sit` model (`Model/Sit.swift`: settling silence, opening bell, target bell, End). Bells
+on the watch are a wrist tap (`WKInterfaceDevice.play(.notification)` in `Bell.swift`); the bowl
+sound plays only when the Sound toggle on the watch home screen is on (`UserDefaults`
+`bellSound`, off by default, for retreats). A mindfulness `WKExtendedRuntimeSession`
+(`WatchSitView.swift`, `WKBackgroundModes: [mindfulness]`) keeps the app running with the wrist
+down for up to an hour; after that, or after a crown press, the scheduled notifications ring
+the bells as on a locked phone. The watch has its own `store.json` in Documents (no app group)
+and saves to Health itself. `Model/Sync.swift` keeps the two stores the same over
+WatchConnectivity: every save sends the snapshot as the application context, the other side
+merges it (`Store.merge`: union of sits by id, the more recently changed intended duration
+wins). The widget target does not compile `Sync.swift`.
 The app follows the system appearance: dark mode is the spiral galaxy on black, light mode is
 grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `GlassTint` and
 `AccentColor` colour sets carry light and dark variants).
@@ -33,6 +46,8 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
 - `scripts/build.sh` — xcodegen + simulator build.
 - `scripts/run.sh` — build, then install and launch on the simulator (`SIM_NAME` env var overrides the device).
 - `scripts/test.sh` — unit tests and UI test.
+- `scripts/watch.sh` — build, then install and launch the watch app on the watch simulator
+  (`WATCH_SIM_NAME` env var overrides the device). Extra arguments go to the app (`-quickSit`).
 - `.zed/tasks.json` (git-ignored, local only) — Zed tasks (Run on simulator, Build, Test) that call the scripts above.
 - `scripts/device.sh <udid>` — signed build and install on a real iPhone (UDID from `xcrun devicectl list devices`). Needs
   `DEVELOPMENT_TEAM = <team id>` in `Local.xcconfig` (git-ignored; `scripts/env.sh` creates a stub).
@@ -46,6 +61,14 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
   run `xcodebuild -downloadPlatform iOS` (about 8.5 GB).
 - Two simulators can share the name "iPhone 17" (one per runtime). The scripts pass `OS=latest`
   to pick the newest one.
+- The iOS scheme builds the embedded watch app, so it needs the watchOS simulator runtime too:
+  `xcodebuild -downloadPlatform watchOS`. Without it even the iPhone build fails with "This
+  scheme builds an embedded Apple Watch app. watchOS 26.5 must be installed".
+- Running the watch app alone needs no paired simulators. Testing sync does: `xcrun simctl pair
+  <watch udid> <iphone udid>` (`simctl list pairs`). The simulator has no haptics.
+- `WKExtendedRuntimeSession.notifyUser(hapticType:)` works only for `alarm` sessions started
+  with `startAtDate`, not for mindfulness ones. A mindfulness session is frontmost-only: it
+  ends when the user presses the crown.
 - Every test target needs `GENERATE_INFOPLIST_FILE: YES` in `project.yml` or signing fails.
 - The widget extension's bundle id must be prefixed by the app's
   (`com.krisnorthfield.NanoBuddha.NanoBuddhaWidgets`), set explicitly in `project.yml`; xcodegen's
@@ -95,7 +118,8 @@ BigSoundBank serves HTML to plain curl; the
 `/UPLOAD/bwf-en/<id>.wav` path with a browser User-Agent works.
 
 ## Tests
-- `NanoBuddhaTests` — unit tests for `DurationPlanner`, `Store`, `WeekLog` and `SitRequest`.
+- `NanoBuddhaTests` — unit tests for `DurationPlanner`, `Store` (including merge), `Sit`, `WeekLog`
+  and `SitRequest`.
 - `NanoBuddhaUITests/SitFlowUITests.swift` — launches with `-quickSit` (a 5 s sit), taps Begin,
   answers the notification prompt (lives in SpringBoard) and the Health prompt (part of the
   app's hierarchy, identifier `UIA.Health.DoNotAllow.Button`), then checks Done and History, and that Copy week puts the week log on the pasteboard.

@@ -1,11 +1,25 @@
 import AVFoundation
-import UIKit
 import UserNotifications
+#if os(watchOS)
+import WatchKit
+#else
+import UIKit
+#endif
 
 /// Rings the singing bowl: in the foreground via audio, and when locked via a notification.
 final class Bell: NSObject, AVAudioPlayerDelegate {
     static let shared = Bell()
     static let soundFile = "bowl.wav"
+    static let soundKey = "bellSound"
+
+    /// The watch has a Sound toggle for retreats, where a wrist tap must do. The phone always rings.
+    static var soundEnabled: Bool {
+        #if os(watchOS)
+        UserDefaults.standard.bool(forKey: soundKey)
+        #else
+        true
+        #endif
+    }
     private var player: AVAudioPlayer?
 
     /// The two moments a bell marks. Each has its own notification so both can be pending at once.
@@ -41,7 +55,13 @@ final class Bell: NSObject, AVAudioPlayerDelegate {
         let content = UNMutableNotificationContent()
         content.title = "Nano Buddha"
         content.body = moment.notificationBody
-        content.sound = UNNotificationSound(named: UNNotificationSoundName(soundFile))
+        if soundEnabled {
+            #if os(watchOS)
+            content.sound = .default  // watchOS has no custom notification sounds.
+            #else
+            content.sound = UNNotificationSound(named: UNNotificationSoundName(soundFile))
+            #endif
+        }
         let seconds = max(1, date.timeIntervalSinceNow)
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: seconds, repeats: false)
         let request = UNNotificationRequest(identifier: moment.notificationID, content: content, trigger: trigger)
@@ -59,8 +79,13 @@ final class Bell: NSObject, AVAudioPlayerDelegate {
     }
 
     func ring() {
+        #if os(watchOS)
+        WKInterfaceDevice.current().play(.notification)
+        #else
         UINotificationFeedbackGenerator().notificationOccurred(.success)
-        guard let url = Bundle.main.url(forResource: Self.soundFile, withExtension: nil) else { return }
+        #endif
+        guard Self.soundEnabled,
+              let url = Bundle.main.url(forResource: Self.soundFile, withExtension: nil) else { return }
         player = try? AVAudioPlayer(contentsOf: url)
         player?.delegate = self
         activateSessionAndPlay()
