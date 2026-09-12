@@ -13,7 +13,7 @@ struct DoneView: View {
                 .foregroundStyle(Color.accentColor)
                 .frame(width: 100, height: 100)
                 .glassEffect(.clear.tint(Color("GlassTint")), in: .circle)
-            Text(session.completed ? "Session complete" : "Ended early")
+            Text(session.completed ? "Session complete" : "Sit complete")
                 .font(.title)
             Text("\(max(1, session.actualMinutes)) minutes")
                 .font(.title2)

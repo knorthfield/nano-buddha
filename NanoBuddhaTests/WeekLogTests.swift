@@ -24,7 +24,7 @@ final class WeekLogTests: XCTestCase {
         let expected = """
         **Sits, 5 Sep 2026–12 Sep 2026** — 2 sits, 41 min
 
-        - Sun 6 Sep, 08:00 — 19 min (ended early)
+        - Sun 6 Sep, 08:00 — 19 min
         - Fri 11 Sep, 08:00 — 22 min
         """
         XCTAssertEqual(WeekLog.markdown(sessions: sessions, now: now, calendar: calendar), expected)

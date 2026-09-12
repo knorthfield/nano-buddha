@@ -14,9 +14,7 @@ enum WeekLog {
         if !week.isEmpty {
             lines.append("")
             for session in week {
-                var line = "- \(sitFormatter.string(from: session.start)) — \(session.actualMinutes) min"
-                if !session.completed { line += " (ended early)" }
-                lines.append(line)
+                lines.append("- \(sitFormatter.string(from: session.start)) — \(session.actualMinutes) min")
             }
         }
         return lines.joined(separator: "\n")
