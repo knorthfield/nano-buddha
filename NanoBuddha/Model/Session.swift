@@ -8,4 +8,5 @@ struct Session: Codable, Identifiable {
     var completed: Bool
 
     var actualSeconds: Int { Int(end.timeIntervalSince(start)) }
+    var actualMinutes: Int { Int((Double(actualSeconds) / 60).rounded()) }
 }

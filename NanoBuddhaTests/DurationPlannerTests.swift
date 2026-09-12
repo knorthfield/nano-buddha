@@ -40,6 +40,16 @@ final class DurationPlannerTests: XCTestCase {
         XCTAssertEqual(Store(fileURL: url).intendedSeconds, 645)
     }
 
+    func testMinutesRoundToNearestLikeHealth() {
+        let now = Date()
+        let store = Store(fileURL: temporaryURL())
+        store.record(Session(start: now, end: now + 280, plannedSeconds: 300, completed: true))
+        store.record(Session(start: now, end: now + 290, plannedSeconds: 300, completed: true))
+        XCTAssertEqual(store.sessions[0].actualMinutes, 5)
+        XCTAssertEqual(Session(start: now, end: now + 269, plannedSeconds: 300, completed: true).actualMinutes, 4)
+        XCTAssertEqual(store.totalMinutes, 10)
+    }
+
     private func temporaryURL() -> URL {
         FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID()).json")
     }

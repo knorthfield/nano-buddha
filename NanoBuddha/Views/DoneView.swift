@@ -13,7 +13,7 @@ struct DoneView: View {
                 .foregroundStyle(Color.accentColor)
             Text(session.completed ? "Session complete" : "Ended early")
                 .font(.title)
-            Text("\(max(1, session.actualSeconds / 60)) minutes")
+            Text("\(max(1, session.actualMinutes)) minutes")
                 .font(.title2)
                 .foregroundStyle(.secondary)
             Text(healthStatus)

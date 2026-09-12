@@ -7,7 +7,7 @@ struct HistoryView: View {
         List {
             Section {
                 LabeledContent("Sits", value: "\(store.sessions.count)")
-                LabeledContent("Total", value: "\(store.totalSeconds / 60) min")
+                LabeledContent("Total", value: "\(store.totalMinutes) min")
             }
             Section("Sessions") {
                 ForEach(store.sessions.reversed()) { session in
@@ -19,7 +19,7 @@ struct HistoryView: View {
                                 .foregroundStyle(.secondary)
                         }
                         Spacer()
-                        Text("\(session.actualSeconds / 60) min")
+                        Text("\(session.actualMinutes) min")
                         if !session.completed {
                             Image(systemName: "pause.circle").foregroundStyle(.secondary)
                         }

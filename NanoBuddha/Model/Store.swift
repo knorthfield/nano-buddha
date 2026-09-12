@@ -24,6 +24,7 @@ final class Store {
     }
 
     var totalSeconds: Int { sessions.reduce(0) { $0 + $1.actualSeconds } }
+    var totalMinutes: Int { Int((Double(totalSeconds) / 60).rounded()) }
 
     func record(_ session: Session) {
         sessions.append(session)
