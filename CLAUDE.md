@@ -8,9 +8,12 @@ The user picks a duration on the first run only. After that the start screen sho
 duration and lets the user nudge it by one minute. The intended duration grows by 15 s per
 completed sit (`Store.intendedSeconds`). The real duration adds a hidden `random(-60...60)` s
 (`NanoBuddha/Model/DurationPlanner.swift`). The sit screen shows no time.
-A singing bowl rings once when the target passes (`Bell.swift`: AVAudioPlayer in the
-foreground, a local notification with the same sound if locked). The sit carries on until the
-user taps End. A sit ended after the bell counts as completed; one ended before it does not. Sessions are saved to `Documents/store.json`
+After Begin the app stays silent for 30 s (`DurationPlanner.settlingSeconds`) so the user can put
+the phone down; then a singing bowl rings to open the sit. The sit and the target are measured
+from that opening bell. The bowl rings again when the target passes (`Bell.swift`: AVAudioPlayer
+in the foreground, a local notification with the same sound if locked; one notification per
+bell). The sit carries on until the user taps End. A sit ended after the target bell counts as
+completed; one ended before it does not. Sessions are saved to `Documents/store.json`
 (`Store.swift` still reads the old `lastNominalMinutes` + `growthSeconds` keys) and to Apple
 Health as Mindful Minutes (`HealthWriter.swift`).
 

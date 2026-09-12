@@ -6,9 +6,26 @@ import UserNotifications
 final class Bell: NSObject, AVAudioPlayerDelegate {
     static let shared = Bell()
     static let soundFile = "bowl.wav"
-    private static let notificationID = "sessionEnd"
     private var player: AVAudioPlayer?
 
+    /// The two moments a bell marks. Each has its own notification so both can be pending at once.
+    enum Moment: CaseIterable {
+        case opening, target
+
+        fileprivate var notificationID: String {
+            switch self {
+            case .opening: "sitStart"
+            case .target: "sessionEnd"
+            }
+        }
+
+        fileprivate var notificationBody: String {
+            switch self {
+            case .opening: "Your sit begins."
+            case .target: "Your time has passed. Sit on, or end when you are ready."
+            }
+        }
+    }
     private override init() {
         super.init()
         NotificationCenter.default.addObserver(
@@ -20,21 +37,25 @@ final class Bell: NSObject, AVAudioPlayerDelegate {
         UNUserNotificationCenter.current().requestAuthorization(options: [.sound, .alert]) { _, _ in }
     }
 
-    static func scheduleNotification(at date: Date) {
+    static func scheduleNotification(for moment: Moment, at date: Date) {
         let content = UNMutableNotificationContent()
         content.title = "Nano Buddha"
-        content.body = "Your time has passed. Sit on, or end when you are ready."
+        content.body = moment.notificationBody
         content.sound = UNNotificationSound(named: UNNotificationSoundName(soundFile))
         let seconds = max(1, date.timeIntervalSinceNow)
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: seconds, repeats: false)
-        let request = UNNotificationRequest(identifier: notificationID, content: content, trigger: trigger)
+        let request = UNNotificationRequest(identifier: moment.notificationID, content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request)
     }
 
-    static func cancelNotification() {
+    static func cancelNotification(for moment: Moment) {
         let center = UNUserNotificationCenter.current()
-        center.removePendingNotificationRequests(withIdentifiers: [notificationID])
-        center.removeDeliveredNotifications(withIdentifiers: [notificationID])
+        center.removePendingNotificationRequests(withIdentifiers: [moment.notificationID])
+        center.removeDeliveredNotifications(withIdentifiers: [moment.notificationID])
+    }
+
+    static func cancelNotifications() {
+        Moment.allCases.forEach(cancelNotification)
     }
 
     func ring() {

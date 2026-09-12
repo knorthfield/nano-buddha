@@ -2,14 +2,16 @@ import SwiftUI
 
 struct SitView: View {
     let plannedSeconds: Int
+    let settlingSeconds: Int
     let onFinish: (Session) -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var start = Date()
+    @State private var sitStart = Date()
     @State private var endDate = Date()
     @State private var breathing = false
     @State private var highlightTurning = false
-    @State private var bellRung = false
+    @State private var openingRung = false
+    @State private var targetRung = false
     private let tick = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -47,32 +49,42 @@ struct SitView: View {
         }
         .statusBarHidden()
         .onAppear {
-            start = Date()
-            endDate = start.addingTimeInterval(TimeInterval(plannedSeconds))
-            Bell.scheduleNotification(at: endDate)
+            sitStart = Date().addingTimeInterval(TimeInterval(settlingSeconds))
+            endDate = sitStart.addingTimeInterval(TimeInterval(plannedSeconds))
+            Bell.scheduleNotification(for: .opening, at: sitStart)
+            Bell.scheduleNotification(for: .target, at: endDate)
             UIApplication.shared.isIdleTimerDisabled = true
             breathing = !reduceMotion
             highlightTurning = !reduceMotion
         }
         .onReceive(tick) { now in
-            if now >= endDate && !bellRung { ringMarkerBell(at: now) }
+            if now >= sitStart && !openingRung {
+                openingRung = true
+                ring(.opening, due: sitStart, now: now)
+            }
+            if now >= endDate && !targetRung {
+                targetRung = true
+                ring(.target, due: endDate, now: now)
+            }
         }
     }
 
-    /// The bell marks the target; the sit carries on until the user taps End.
-    private func ringMarkerBell(at now: Date) {
-        bellRung = true
-        Bell.cancelNotification()
-        // The timer does not tick while the phone is locked. If the target passed more than
+    /// The opening bell marks the start of the sit after the settling silence; the target bell
+    /// marks the target. The sit carries on until the user taps End.
+    private func ring(_ moment: Bell.Moment, due: Date, now: Date) {
+        Bell.cancelNotification(for: moment)
+        // The timer does not tick while the phone is locked. If the moment passed more than
         // a couple of seconds ago the notification already rang, so do not ring twice.
-        if now.timeIntervalSince(endDate) < 2 { Bell.shared.ring() }
+        if now.timeIntervalSince(due) < 2 { Bell.shared.ring() }
     }
 
     private func finish() {
         UIApplication.shared.isIdleTimerDisabled = false
-        Bell.cancelNotification()
+        Bell.cancelNotifications()
         Bell.shared.stop()
         let end = Date()
-        onFinish(Session(start: start, end: end, plannedSeconds: plannedSeconds, completed: end >= endDate))
+        // An End during the settling silence records a sit of no length, not a negative one.
+        onFinish(Session(start: min(sitStart, end), end: end, plannedSeconds: plannedSeconds,
+                         completed: end >= endDate))
     }
 }
