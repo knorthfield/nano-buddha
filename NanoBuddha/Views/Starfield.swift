@@ -35,7 +35,7 @@ struct Starfield: View {
         Canvas { context, size in
             var generator = SeededGenerator(seed: 7)
             drawBackgroundStars(in: &context, size: size, generator: &generator)
-            drawCore(in: &context, size: size)
+            drawCore(in: &context, size: size, generator: &generator)
             for arm in 0..<2 {
                 let armAngle = Double(arm) * .pi
                 drawArmGlow(in: &context, size: size, armAngle: armAngle, generator: &generator)
@@ -46,11 +46,11 @@ struct Starfield: View {
 
     // MARK: Spiral geometry
 
-    /// The arms wind a bit more than one full turn, from the centre to past the screen edges.
+    /// The arms wind a bit more than one full turn, from just outside the sit disc to past the screen edges.
     private let armTurns = 2.2 * Double.pi
 
     private func armPoint(t: Double, armAngle: Double, size: CGSize) -> CGPoint {
-        let innerRadius = size.width * 0.012
+        let innerRadius = size.width * 0.07
         let outerRadius = size.width * 0.35
         let growth = log(outerRadius / innerRadius) / armTurns
         let theta = t * armTurns
@@ -78,10 +78,19 @@ struct Starfield: View {
         }
     }
 
-    /// A warm glow at the centre where the arms meet.
-    private func drawCore(in context: inout GraphicsContext, size: CGSize) {
+    /// A soft warm glow and a light sprinkle of stars where the arms meet, behind the sit disc.
+    private func drawCore(in context: inout GraphicsContext, size: CGSize, generator: inout SeededGenerator) {
         let centre = CGPoint(x: size.width / 2, y: size.height / 2)
-        drawGlow(in: &context, at: centre, radius: size.width * 0.06, tint: Color.accentColor.opacity(0.3))
+        let coreRadius = size.width * 0.07
+        drawGlow(in: &context, at: centre, radius: coreRadius, tint: Color.accentColor.opacity(0.18))
+        for _ in 0..<40 {
+            let direction = Double.random(in: 0...(2 * .pi), using: &generator)
+            let distance = coreRadius * sqrt(CGFloat.random(in: 0...1, using: &generator))
+            let point = CGPoint(x: centre.x + cos(direction) * distance, y: centre.y + sin(direction) * distance)
+            let radius = CGFloat.random(in: 0.3...1.2, using: &generator)
+            let alpha = Double.random(in: 0.3...0.9, using: &generator) * starOpacity
+            drawStar(in: &context, at: point, radius: radius, tint: starTint(&generator), alpha: alpha, halo: false)
+        }
     }
 
     /// Soft blobs along each arm give the stream its milky band.
