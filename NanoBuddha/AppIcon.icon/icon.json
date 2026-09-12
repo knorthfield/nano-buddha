@@ -15,7 +15,6 @@
           "blend-mode": "normal",
           "fill": "automatic",
           "glass": true,
-          "image-name": "hole.svg",
           "name": "hole",
           "opacity": 1,
           "position": {
@@ -24,7 +23,16 @@
               -4.5,
               -7.5
             ]
-          }
+          },
+          "image-name-specializations": [
+            {
+              "value": "hole-light.svg"
+            },
+            {
+              "appearance": "dark",
+              "value": "hole.svg"
+            }
+          ]
         }
       ],
       "lighting": "individual",
@@ -44,7 +52,6 @@
       "layers": [
         {
           "glass": false,
-          "image-name": "sand.svg",
           "name": "stars",
           "position": {
             "scale": 1,
@@ -54,6 +61,9 @@
             ]
           },
           "image-name-specializations": [
+            {
+              "value": "sand.svg"
+            },
             {
               "appearance": "dark",
               "value": "stars.svg"

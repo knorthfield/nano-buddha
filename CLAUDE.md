@@ -43,10 +43,13 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
 - xcodegen does not set `ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME`; without it in `project.yml`
   `Color.accentColor` is system blue, not the tan `AccentColor` colorset.
 - The app icon is `NanoBuddha/AppIcon.icon`, a hand-written Icon Composer bundle (`icon.json`
-  plus `Assets/hole.svg`, `Assets/stars.svg` for dark and `Assets/sand.svg` for light). Per-appearance
-  values go in `fill-specializations` / `image-name-specializations` arrays of
-  `{"appearance": "dark", "value": ...}` next to the light default; a `specializations` object inside
-  the property does not parse. `scripts/icon-stars.swift` (and `--light`) regenerate the SVGs. Do not add an `AppIcon.appiconset` next to it: two `AppIcon` assets
+  plus `Assets/`: `hole.svg` + `stars.svg` for dark, `hole-light.svg` + `sand.svg` for light).
+  A per-appearance property is a `<key>-specializations` array that REPLACES the plain key:
+  `[{"value": <light>}, {"appearance": "dark", "value": <dark>}]`. Keeping the plain key next to
+  the array, or leaving out the unqualified `{"value": ...}` entry, makes ictool and actool drop
+  the array silently. Check with `ictool <bundle> --export-intermediate-representation --platform iOS
+  --output-directory <dir>`: every image the icon uses must appear as an imageset there.
+  `scripts/icon-stars.swift` (and `--light`) regenerate the star SVGs. Do not add an `AppIcon.appiconset` next to it: two `AppIcon` assets
   conflict, and Xcode makes the flat fallbacks itself. Preview it with
   `"/Applications/Xcode.app/Contents/Applications/Icon Composer.app/Contents/Executables/ictool"
   NanoBuddha/AppIcon.icon --export-image --output-file out.png --platform iOS --rendition Default
