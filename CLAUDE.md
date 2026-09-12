@@ -15,7 +15,8 @@ in the foreground, a local notification with the same sound if locked; one notif
 bell). The sit carries on until the user taps End. A sit ended after the target bell counts as
 completed; one ended before it does not. Sessions are saved to `Documents/store.json`
 (`Store.swift` still reads the old `lastNominalMinutes` + `growthSeconds` keys) and to Apple
-Health as Mindful Minutes (`HealthWriter.swift`).
+Health as Mindful Minutes (`HealthWriter.swift`). History has a Copy week button that puts a
+markdown log of the last 7 days on the pasteboard (`WeekLog.swift`).
 
 ## Build and run
 - `project.yml` is the source of truth; `NanoBuddha.xcodeproj` is generated and git-ignored.
@@ -68,7 +69,7 @@ BigSoundBank serves HTML to plain curl; the
 - `NanoBuddhaTests` — unit tests for `DurationPlanner` and `Store`.
 - `NanoBuddhaUITests/SitFlowUITests.swift` — launches with `-quickSit` (a 5 s sit), taps Begin,
   answers the notification prompt (lives in SpringBoard) and the Health prompt (part of the
-  app's hierarchy, identifier `UIA.Health.DoNotAllow.Button`), then checks Done and History.
+  app's hierarchy, identifier `UIA.Health.DoNotAllow.Button`), then checks Done and History, and that Copy week flips to Copied.
 
 ## Git
 - Commits use the GitHub noreply address set in the repo-local git config. The GitHub account

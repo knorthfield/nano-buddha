@@ -31,6 +31,9 @@ final class SitFlowUITests: XCTestCase {
         XCTAssertTrue(app.buttons["History"].waitForExistence(timeout: 5))
         app.buttons["History"].tap()
         XCTAssertTrue(app.staticTexts["Total"].waitForExistence(timeout: 5))
+        app.buttons["CopyWeek"].tap()
+        let copied = app.buttons.matching(NSPredicate(format: "label == 'Copied'")).firstMatch
+        XCTAssertTrue(copied.waitForExistence(timeout: 2))
         add(XCTAttachment(screenshot: app.screenshot()))
     }
 }
