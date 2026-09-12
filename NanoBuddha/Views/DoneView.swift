@@ -21,7 +21,7 @@ struct DoneView: View {
                 .foregroundStyle(.secondary)
             Spacer()
             Button("Done", action: onDismiss)
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.glass(.clear.tint(.black.opacity(0.45))))
                 .padding(.bottom, 40)
         }
         .padding()

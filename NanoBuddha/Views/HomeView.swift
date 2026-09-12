@@ -44,7 +44,7 @@ struct HomeView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.glass(.clear.tint(.black.opacity(0.45))))
                 .padding(.horizontal, 48)
                 Spacer()
                 if !store.sessions.isEmpty {
