@@ -40,7 +40,7 @@ markdown log of the last 7 days on the pasteboard (`WeekLog.swift`).
 - xcodegen does not set `ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME`; without it in `project.yml`
   `Color.accentColor` is system blue, not the tan `AccentColor` colorset.
 - The app icon is `NanoBuddha/AppIcon.icon`, a hand-written Icon Composer bundle (`icon.json`
-  plus `Assets/ring.svg`). Do not add an `AppIcon.appiconset` next to it: two `AppIcon` assets
+  plus `Assets/hole.svg` and `Assets/stars.svg`). Do not add an `AppIcon.appiconset` next to it: two `AppIcon` assets
   conflict, and Xcode makes the flat fallbacks itself. Preview it with
   `"/Applications/Xcode.app/Contents/Applications/Icon Composer.app/Contents/Executables/ictool"
   NanoBuddha/AppIcon.icon --export-image --output-file out.png --platform iOS --rendition Default
@@ -69,7 +69,7 @@ BigSoundBank serves HTML to plain curl; the
 - `NanoBuddhaTests` — unit tests for `DurationPlanner` and `Store`.
 - `NanoBuddhaUITests/SitFlowUITests.swift` — launches with `-quickSit` (a 5 s sit), taps Begin,
   answers the notification prompt (lives in SpringBoard) and the Health prompt (part of the
-  app's hierarchy, identifier `UIA.Health.DoNotAllow.Button`), then checks Done and History, and that Copy week flips to Copied.
+  app's hierarchy, identifier `UIA.Health.DoNotAllow.Button`), then checks Done and History, and that Copy week puts the week log on the pasteboard.
 
 ## Git
 - Commits use the GitHub noreply address set in the repo-local git config. The GitHub account

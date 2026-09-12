@@ -3,7 +3,7 @@ import SwiftUI
 /// A two-arm spiral galaxy on a black background, shared by every screen.
 /// Fixed seed so the stars stay put across redraws. The whole field turns
 /// slowly about the screen centre, so the arms read as a flowing stream.
-/// The bright halo stars sit in a layer of their own and travel outward
+/// The bright halo stars sit in a layer of their own and travel inward
 /// along the arms, which gives the stream depth and motion.
 struct Starfield: View {
     var secondsPerTurn: Double = 480
@@ -12,8 +12,8 @@ struct Starfield: View {
     @State private var angle = 0.0
     @State private var flow = 0.0
     private let frameRate = 30.0
-    /// How long a bright star takes to travel the full length of an arm.
-    private let flowSecondsPerArm = 90.0
+    /// How long a bright star of average speed takes to travel the full length of an arm.
+    private let flowSecondsPerArm = 180.0
     private let tick = Timer.publish(every: 1 / 30, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -33,7 +33,7 @@ struct Starfield: View {
         .onReceive(tick) { _ in
             guard !reduceMotion else { return }
             angle -= 360 / secondsPerTurn / frameRate
-            flow = (flow + 1 / flowSecondsPerArm / frameRate).truncatingRemainder(dividingBy: 1)
+            flow += 1 / flowSecondsPerArm / frameRate
         }
     }
 }
@@ -169,15 +169,16 @@ private struct GalaxyLayer: View {
 
 // MARK: Flowing stars
 
-/// The bright halo stars. Each starts at its own place on an arm and travels outward along it,
-/// fading in near the core and out near the edge, then starts again from the core.
+/// The bright halo stars. Each starts at its own place on an arm and travels inward along it,
+/// fading in near the edge and out near the core, then starts again from the edge.
 private struct FlowingStarsLayer: View {
-    /// Progress along the arm, 0...1, added to every star's starting point.
+    /// Arm lengths travelled so far at average speed; grows without bound.
     let flow: Double
 
     private struct Star {
         let armAngle: Double
         let start: Double
+        let speed: Double
         let across: CGFloat
         let radius: CGFloat
         let alpha: Double
@@ -189,6 +190,7 @@ private struct FlowingStarsLayer: View {
         return (0..<70).map { index in
             Star(armAngle: Double(index % 2) * .pi,
                  start: Double.random(in: 0...1, using: &generator),
+                 speed: Double.random(in: 0.7...1.3, using: &generator),
                  across: (CGFloat.random(in: -1...1, using: &generator) + CGFloat.random(in: -1...1, using: &generator)) / 2,
                  radius: CGFloat.random(in: 1.6...2.6, using: &generator),
                  alpha: Double.random(in: 0.3...1, using: &generator) * Spiral.starOpacity,
@@ -199,7 +201,8 @@ private struct FlowingStarsLayer: View {
     var body: some View {
         Canvas { context, size in
             for star in Self.stars {
-                let t = (star.start + flow).truncatingRemainder(dividingBy: 1)
+                let travelled = star.start - flow * star.speed
+                let t = travelled - floor(travelled)
                 let centre = Spiral.scatteredPoint(t: t, armAngle: star.armAngle, across: star.across, size: size)
                 let endFade = min(1, t * 8, (1 - t) * 8)
                 let alpha = star.alpha * (1 - 0.4 * t) * endFade

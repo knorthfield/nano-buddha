@@ -1,3 +1,4 @@
+import UIKit
 import XCTest
 
 final class SitFlowUITests: XCTestCase {
@@ -31,9 +32,14 @@ final class SitFlowUITests: XCTestCase {
         XCTAssertTrue(app.buttons["History"].waitForExistence(timeout: 5))
         app.buttons["History"].tap()
         XCTAssertTrue(app.staticTexts["Total"].waitForExistence(timeout: 5))
+        // The Copied label reverts after 2 s, too brief to catch reliably while the starfield
+        // animates, so check the pasteboard instead. The simulator shares it with the runner.
+        UIPasteboard.general.string = ""
         app.buttons["CopyWeek"].tap()
-        let copied = app.buttons.matching(NSPredicate(format: "label == 'Copied'")).firstMatch
-        XCTAssertTrue(copied.waitForExistence(timeout: 2))
+        let pasted = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in
+            UIPasteboard.general.string?.hasPrefix("**Sits, ") == true
+        }, object: nil)
+        XCTAssertEqual(XCTWaiter().wait(for: [pasted], timeout: 5), .completed)
         add(XCTAttachment(screenshot: app.screenshot()))
     }
 }
