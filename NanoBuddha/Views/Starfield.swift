@@ -1,26 +1,35 @@
 import SwiftUI
 
 /// A two-arm spiral galaxy on a black background, shared by every screen.
-/// Fixed seed so the stars stay put across redraws. The whole canvas turns
+/// Fixed seed so the stars stay put across redraws. The whole field turns
 /// slowly about the screen centre, so the arms read as a flowing stream.
+/// The field is drawn as three depth layers that share the rotation but
+/// drift on a slow circle by different amounts, so near stars sway more
+/// than far ones (parallax) while the arms keep their shape.
 struct Starfield: View {
     var secondsPerTurn: Double = 480
 
-    private let starOpacity = 0.7
-    private let violet = Color(red: 0.45, green: 0.30, blue: 0.75)
-
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var angle = 0.0
+    @State private var driftPhase = 0.0
     private let frameRate = 30.0
+    private let driftSecondsPerTurn = 24.0
+    private let driftRadius: CGFloat = 20
     private let tick = Timer.publish(every: 1 / 30, on: .main, in: .common).autoconnect()
 
     var body: some View {
         GeometryReader { geometry in
             let side = max(geometry.size.width, geometry.size.height) * 1.5
-            canvas
-                .frame(width: side, height: side)
-                .rotationEffect(.degrees(angle))
-                .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
+            ZStack {
+                ForEach(StarLayer.Depth.allCases, id: \.self) { depth in
+                    StarLayer(depth: depth)
+                        .frame(width: side, height: side)
+                        .offset(x: driftRadius * depth.drift * cos(driftPhase),
+                                y: driftRadius * depth.drift * sin(driftPhase))
+                }
+            }
+            .rotationEffect(.degrees(angle))
+            .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
         }
         .background(Color.black)
         .ignoresSafeArea()
@@ -28,10 +37,34 @@ struct Starfield: View {
         .onReceive(tick) { _ in
             guard !reduceMotion else { return }
             angle -= 360 / secondsPerTurn / frameRate
+            driftPhase += 2 * .pi / driftSecondsPerTurn / frameRate
+        }
+    }
+}
+
+/// One depth slice of the galaxy. Every layer walks the same seeded random
+/// sequence and only fills the stars that belong to its depth, so the three
+/// layers stack into the same picture as one canvas would draw.
+private struct StarLayer: View {
+    enum Depth: CaseIterable {
+        case far, mid, near
+
+        /// How far the layer sways relative to the mid layer.
+        var drift: CGFloat {
+            switch self {
+            case .far: 0.35
+            case .mid: 1
+            case .near: 3
+            }
         }
     }
 
-    private var canvas: some View {
+    let depth: Depth
+
+    private let starOpacity = 0.7
+    private let violet = Color(red: 0.45, green: 0.30, blue: 0.75)
+
+    var body: some View {
         Canvas { context, size in
             var generator = SeededGenerator(seed: 7)
             drawBackgroundStars(in: &context, size: size, generator: &generator)
@@ -67,6 +100,7 @@ struct Starfield: View {
 
     // MARK: Drawing
 
+    /// The far layer: faint stars behind the galaxy.
     private func drawBackgroundStars(in context: inout GraphicsContext, size: CGSize,
                                      generator: inout SeededGenerator) {
         for _ in 0..<120 {
@@ -74,6 +108,7 @@ struct Starfield: View {
                                  y: CGFloat.random(in: 0...size.height, using: &generator))
             let radius = CGFloat.random(in: 0.3...1.0, using: &generator)
             let alpha = Double.random(in: 0.15...0.5, using: &generator) * starOpacity
+            guard depth == .far else { continue }
             drawStar(in: &context, at: centre, radius: radius, tint: .white, alpha: alpha, halo: false)
         }
     }
@@ -82,14 +117,18 @@ struct Starfield: View {
     private func drawCore(in context: inout GraphicsContext, size: CGSize, generator: inout SeededGenerator) {
         let centre = CGPoint(x: size.width / 2, y: size.height / 2)
         let coreRadius = size.width * 0.07
-        drawGlow(in: &context, at: centre, radius: coreRadius, tint: Color.accentColor.opacity(0.18))
+        if depth == .mid {
+            drawGlow(in: &context, at: centre, radius: coreRadius, tint: Color.accentColor.opacity(0.18))
+        }
         for _ in 0..<60 {
             let direction = Double.random(in: 0...(2 * .pi), using: &generator)
             let distance = coreRadius * sqrt(CGFloat.random(in: 0...1, using: &generator))
             let point = CGPoint(x: centre.x + cos(direction) * distance, y: centre.y + sin(direction) * distance)
             let radius = CGFloat.random(in: 0.3...1.2, using: &generator)
             let alpha = Double.random(in: 0.3...0.9, using: &generator) * starOpacity
-            drawStar(in: &context, at: point, radius: radius, tint: starTint(&generator), alpha: alpha, halo: false)
+            let tint = starTint(&generator)
+            guard depth == .mid else { continue }
+            drawStar(in: &context, at: point, radius: radius, tint: tint, alpha: alpha, halo: false)
         }
     }
 
@@ -102,10 +141,12 @@ struct Starfield: View {
             let centre = armPoint(t: t, armAngle: armAngle, size: size)
             let tint = (index % 2 == 0 ? Color.accentColor : violet)
                 .opacity(Double.random(in: 0.1...0.16, using: &generator))
+            guard depth == .mid else { continue }
             drawGlow(in: &context, at: centre, radius: armSpread(t: t, size: size) * 2.5, tint: tint)
         }
     }
 
+    /// Dim arm stars sit in the mid layer; the bright ones with a halo are the near layer.
     private func drawArmStars(in context: inout GraphicsContext, size: CGSize, armAngle: Double,
                               generator: inout SeededGenerator) {
         for _ in 0..<450 {
@@ -121,7 +162,9 @@ struct Starfield: View {
             let radius = bright ? CGFloat.random(in: 1.6...2.6, using: &generator)
                                 : CGFloat.random(in: 0.3...1.4, using: &generator)
             let alpha = Double.random(in: 0.3...1, using: &generator) * starOpacity * (1 - 0.4 * t)
-            drawStar(in: &context, at: centre, radius: radius, tint: starTint(&generator), alpha: alpha, halo: bright)
+            let tint = starTint(&generator)
+            guard depth == (bright ? .near : .mid) else { continue }
+            drawStar(in: &context, at: centre, radius: radius, tint: tint, alpha: alpha, halo: bright)
         }
     }
 
