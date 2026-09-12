@@ -8,9 +8,11 @@ struct DoneView: View {
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
-            Image(systemName: session.completed ? "checkmark.circle" : "pause.circle")
-                .font(.system(size: 64, weight: .thin))
+            Image(systemName: session.completed ? "checkmark" : "pause")
+                .font(.system(size: 36, weight: .light))
                 .foregroundStyle(Color.accentColor)
+                .frame(width: 100, height: 100)
+                .glassEffect(.clear.tint(.black.opacity(0.45)), in: .circle)
             Text(session.completed ? "Session complete" : "Ended early")
                 .font(.title)
             Text("\(max(1, session.actualMinutes)) minutes")
