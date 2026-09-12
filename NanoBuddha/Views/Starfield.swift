@@ -46,11 +46,11 @@ struct Starfield: View {
 
     // MARK: Spiral geometry
 
-    /// The arms wind a bit more than one full turn, from just outside the sit disc to past the screen edges.
+    /// The arms wind a bit more than one full turn, from the centre to past the screen edges.
     private let armTurns = 2.2 * Double.pi
 
     private func armPoint(t: Double, armAngle: Double, size: CGSize) -> CGPoint {
-        let innerRadius = size.width * 0.07
+        let innerRadius = size.width * 0.012
         let outerRadius = size.width * 0.35
         let growth = log(outerRadius / innerRadius) / armTurns
         let theta = t * armTurns
@@ -78,10 +78,10 @@ struct Starfield: View {
         }
     }
 
-    /// A dim warm glow at the centre. The sit disc sits over it, so it stays faint.
+    /// A warm glow at the centre where the arms meet.
     private func drawCore(in context: inout GraphicsContext, size: CGSize) {
         let centre = CGPoint(x: size.width / 2, y: size.height / 2)
-        drawGlow(in: &context, at: centre, radius: size.width * 0.06, tint: Color.accentColor.opacity(0.12))
+        drawGlow(in: &context, at: centre, radius: size.width * 0.06, tint: Color.accentColor.opacity(0.3))
     }
 
     /// Soft blobs along each arm give the stream its milky band.
@@ -92,7 +92,7 @@ struct Starfield: View {
             let t = (Double(index) + 0.5) / Double(blobs)
             let centre = armPoint(t: t, armAngle: armAngle, size: size)
             let tint = (index % 2 == 0 ? Color.accentColor : violet)
-                .opacity(Double.random(in: 0.08...0.14, using: &generator))
+                .opacity(Double.random(in: 0.1...0.16, using: &generator))
             drawGlow(in: &context, at: centre, radius: armSpread(t: t, size: size) * 2.5, tint: tint)
         }
     }
