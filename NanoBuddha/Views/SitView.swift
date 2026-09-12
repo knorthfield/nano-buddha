@@ -42,8 +42,7 @@ struct SitView: View {
                 .accessibilityHidden(true)
             VStack {
                 Spacer()
-                Button("End") { finish() }
-                    .buttonStyle(.glass)
+                PrimaryButton(title: "End") { finish() }
                     .padding(.bottom, 40)
             }
         }

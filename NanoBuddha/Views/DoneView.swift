@@ -20,8 +20,7 @@ struct DoneView: View {
                 .font(.footnote)
                 .foregroundStyle(.secondary)
             Spacer()
-            Button("Done", action: onDismiss)
-                .buttonStyle(.glass(.clear.tint(.black.opacity(0.45))))
+            PrimaryButton(title: "Done", action: onDismiss)
                 .padding(.bottom, 40)
         }
         .padding()

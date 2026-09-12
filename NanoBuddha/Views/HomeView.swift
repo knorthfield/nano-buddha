@@ -23,29 +23,22 @@ struct HomeView: View {
                     .frame(height: 160)
                 } else {
                     HStack(spacing: 24) {
-                        Button { store.nudge(by: -60) } label: { Image(systemName: "minus") }
+                        Button { store.nudge(by: -60) } label: { Image(systemName: "minus").frame(width: 24, height: 24) }
                             .accessibilityLabel("One minute less")
                             .disabled(store.intendedSeconds <= 60)
                         Text(intendedTimeText)
                             .font(.title)
                             .monospacedDigit()
-                        Button { store.nudge(by: 60) } label: { Image(systemName: "plus") }
+                        Button { store.nudge(by: 60) } label: { Image(systemName: "plus").frame(width: 24, height: 24) }
                             .accessibilityLabel("One minute more")
                     }
                     .buttonStyle(.glass)
                     .buttonBorderShape(.circle)
                 }
-                Button {
+                PrimaryButton(title: "Begin") {
                     Bell.requestNotificationPermission()
                     onStart()
-                } label: {
-                    Text("Begin")
-                        .font(.title3.weight(.semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
                 }
-                .buttonStyle(.glass(.clear.tint(.black.opacity(0.45))))
-                .padding(.horizontal, 48)
                 Spacer()
                 if !store.sessions.isEmpty {
                     Text("\(store.sessions.count) sits · \(store.totalSeconds / 60) minutes")
