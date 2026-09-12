@@ -3,31 +3,27 @@ import SwiftUI
 /// A two-arm spiral galaxy on a black background, shared by every screen.
 /// Fixed seed so the stars stay put across redraws. The whole field turns
 /// slowly about the screen centre, so the arms read as a flowing stream.
-/// The field is drawn as three depth layers that share the rotation but
-/// drift on a slow circle by different amounts, so near stars sway more
-/// than far ones (parallax) while the arms keep their shape.
+/// The bright halo stars sit in a layer of their own and travel outward
+/// along the arms, which gives the stream depth and motion.
 struct Starfield: View {
     var secondsPerTurn: Double = 480
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var angle = 0.0
-    @State private var driftPhase = 0.0
+    @State private var flow = 0.0
     private let frameRate = 30.0
-    private let driftSecondsPerTurn = 24.0
-    private let driftRadius: CGFloat = 20
+    /// How long a bright star takes to travel the full length of an arm.
+    private let flowSecondsPerArm = 90.0
     private let tick = Timer.publish(every: 1 / 30, on: .main, in: .common).autoconnect()
 
     var body: some View {
         GeometryReader { geometry in
             let side = max(geometry.size.width, geometry.size.height) * 1.5
             ZStack {
-                ForEach(StarLayer.Depth.allCases, id: \.self) { depth in
-                    StarLayer(depth: depth)
-                        .frame(width: side, height: side)
-                        .offset(x: driftRadius * depth.drift * cos(driftPhase),
-                                y: driftRadius * depth.drift * sin(driftPhase))
-                }
+                GalaxyLayer()
+                FlowingStarsLayer(flow: flow)
             }
+            .frame(width: side, height: side)
             .rotationEffect(.degrees(angle))
             .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
         }
@@ -37,31 +33,70 @@ struct Starfield: View {
         .onReceive(tick) { _ in
             guard !reduceMotion else { return }
             angle -= 360 / secondsPerTurn / frameRate
-            driftPhase += 2 * .pi / driftSecondsPerTurn / frameRate
+            flow = (flow + 1 / flowSecondsPerArm / frameRate).truncatingRemainder(dividingBy: 1)
         }
     }
 }
 
-/// One depth slice of the galaxy. Every layer walks the same seeded random
-/// sequence and only fills the stars that belong to its depth, so the three
-/// layers stack into the same picture as one canvas would draw.
-private struct StarLayer: View {
-    enum Depth: CaseIterable {
-        case far, mid, near
+// MARK: Spiral geometry
 
-        /// How far the layer sways relative to the mid layer.
-        var drift: CGFloat {
-            switch self {
-            case .far: 0.35
-            case .mid: 1
-            case .near: 3
-            }
-        }
+/// The arms wind a bit more than one full turn, from just outside the sit disc to past the screen edges.
+private enum Spiral {
+    static let armTurns = 2.2 * Double.pi
+    static let starOpacity = 0.7
+
+    static func armPoint(t: Double, armAngle: Double, size: CGSize) -> CGPoint {
+        let innerRadius = size.width * 0.07
+        let outerRadius = size.width * 0.35
+        let growth = log(outerRadius / innerRadius) / armTurns
+        let theta = t * armTurns
+        let radius = innerRadius * exp(growth * theta)
+        return CGPoint(x: size.width / 2 + cos(theta + armAngle) * radius,
+                       y: size.height / 2 + sin(theta + armAngle) * radius)
     }
 
-    let depth: Depth
+    static func armSpread(t: Double, size: CGSize) -> CGFloat {
+        let point = armPoint(t: t, armAngle: 0, size: size)
+        let radius = hypot(point.x - size.width / 2, point.y - size.height / 2)
+        return size.width * 0.025 + radius * 0.05
+    }
 
-    private let starOpacity = 0.7
+    /// A point on the arm pushed across it by `across` (−1...1) times the arm's spread.
+    static func scatteredPoint(t: Double, armAngle: Double, across: CGFloat, size: CGSize) -> CGPoint {
+        let point = armPoint(t: t, armAngle: armAngle, size: size)
+        let scatter = across * armSpread(t: t, size: size)
+        let outward = atan2(point.y - size.height / 2, point.x - size.width / 2)
+        return CGPoint(x: point.x + cos(outward) * scatter, y: point.y + sin(outward) * scatter)
+    }
+
+    static func starTint(_ generator: inout SeededGenerator) -> Color {
+        let roll = Double.random(in: 0...1, using: &generator)
+        if roll < 0.6 { return .white }
+        if roll < 0.85 { return Color(red: 0.78, green: 0.86, blue: 1.0) }
+        return Color(red: 1.0, green: 0.8, blue: 0.62)
+    }
+
+    static func drawStar(in context: inout GraphicsContext, at centre: CGPoint, radius: CGFloat,
+                         tint: Color, alpha: Double, halo: Bool) {
+        if halo {
+            drawGlow(in: &context, at: centre, radius: radius * 4, tint: tint.opacity(alpha * 0.35))
+        }
+        let rect = CGRect(x: centre.x - radius, y: centre.y - radius, width: radius * 2, height: radius * 2)
+        context.fill(Path(ellipseIn: rect), with: .color(tint.opacity(alpha)))
+    }
+
+    static func drawGlow(in context: inout GraphicsContext, at centre: CGPoint, radius: CGFloat, tint: Color) {
+        let rect = CGRect(x: centre.x - radius, y: centre.y - radius, width: radius * 2, height: radius * 2)
+        context.fill(Path(ellipseIn: rect),
+                     with: .radialGradient(Gradient(colors: [tint, .clear]), center: centre,
+                                           startRadius: 0, endRadius: radius))
+    }
+}
+
+// MARK: Static galaxy
+
+/// Background stars, the core, the arm glow and the dim arm stars. Drawn once; only rotated.
+private struct GalaxyLayer: View {
     private let violet = Color(red: 0.45, green: 0.30, blue: 0.75)
 
     var body: some View {
@@ -77,39 +112,14 @@ private struct StarLayer: View {
         }
     }
 
-    // MARK: Spiral geometry
-
-    /// The arms wind a bit more than one full turn, from just outside the sit disc to past the screen edges.
-    private let armTurns = 2.2 * Double.pi
-
-    private func armPoint(t: Double, armAngle: Double, size: CGSize) -> CGPoint {
-        let innerRadius = size.width * 0.07
-        let outerRadius = size.width * 0.35
-        let growth = log(outerRadius / innerRadius) / armTurns
-        let theta = t * armTurns
-        let radius = innerRadius * exp(growth * theta)
-        return CGPoint(x: size.width / 2 + cos(theta + armAngle) * radius,
-                       y: size.height / 2 + sin(theta + armAngle) * radius)
-    }
-
-    private func armSpread(t: Double, size: CGSize) -> CGFloat {
-        let point = armPoint(t: t, armAngle: 0, size: size)
-        let radius = hypot(point.x - size.width / 2, point.y - size.height / 2)
-        return size.width * 0.025 + radius * 0.05
-    }
-
-    // MARK: Drawing
-
-    /// The far layer: faint stars behind the galaxy.
     private func drawBackgroundStars(in context: inout GraphicsContext, size: CGSize,
                                      generator: inout SeededGenerator) {
         for _ in 0..<120 {
             let centre = CGPoint(x: CGFloat.random(in: 0...size.width, using: &generator),
                                  y: CGFloat.random(in: 0...size.height, using: &generator))
             let radius = CGFloat.random(in: 0.3...1.0, using: &generator)
-            let alpha = Double.random(in: 0.15...0.5, using: &generator) * starOpacity
-            guard depth == .far else { continue }
-            drawStar(in: &context, at: centre, radius: radius, tint: .white, alpha: alpha, halo: false)
+            let alpha = Double.random(in: 0.15...0.5, using: &generator) * Spiral.starOpacity
+            Spiral.drawStar(in: &context, at: centre, radius: radius, tint: .white, alpha: alpha, halo: false)
         }
     }
 
@@ -117,18 +127,15 @@ private struct StarLayer: View {
     private func drawCore(in context: inout GraphicsContext, size: CGSize, generator: inout SeededGenerator) {
         let centre = CGPoint(x: size.width / 2, y: size.height / 2)
         let coreRadius = size.width * 0.07
-        if depth == .mid {
-            drawGlow(in: &context, at: centre, radius: coreRadius, tint: Color.accentColor.opacity(0.18))
-        }
+        Spiral.drawGlow(in: &context, at: centre, radius: coreRadius, tint: Color.accentColor.opacity(0.18))
         for _ in 0..<60 {
             let direction = Double.random(in: 0...(2 * .pi), using: &generator)
             let distance = coreRadius * sqrt(CGFloat.random(in: 0...1, using: &generator))
             let point = CGPoint(x: centre.x + cos(direction) * distance, y: centre.y + sin(direction) * distance)
             let radius = CGFloat.random(in: 0.3...1.2, using: &generator)
-            let alpha = Double.random(in: 0.3...0.9, using: &generator) * starOpacity
-            let tint = starTint(&generator)
-            guard depth == .mid else { continue }
-            drawStar(in: &context, at: point, radius: radius, tint: tint, alpha: alpha, halo: false)
+            let alpha = Double.random(in: 0.3...0.9, using: &generator) * Spiral.starOpacity
+            Spiral.drawStar(in: &context, at: point, radius: radius, tint: Spiral.starTint(&generator),
+                            alpha: alpha, halo: false)
         }
     }
 
@@ -138,57 +145,67 @@ private struct StarLayer: View {
         let blobs = 12
         for index in 0..<blobs {
             let t = (Double(index) + 0.5) / Double(blobs)
-            let centre = armPoint(t: t, armAngle: armAngle, size: size)
+            let centre = Spiral.armPoint(t: t, armAngle: armAngle, size: size)
             let tint = (index % 2 == 0 ? Color.accentColor : violet)
                 .opacity(Double.random(in: 0.1...0.16, using: &generator))
-            guard depth == .mid else { continue }
-            drawGlow(in: &context, at: centre, radius: armSpread(t: t, size: size) * 2.5, tint: tint)
+            Spiral.drawGlow(in: &context, at: centre, radius: Spiral.armSpread(t: t, size: size) * 2.5, tint: tint)
         }
     }
 
-    /// Dim arm stars sit in the mid layer; the bright ones with a halo are the near layer.
     private func drawArmStars(in context: inout GraphicsContext, size: CGSize, armAngle: Double,
                               generator: inout SeededGenerator) {
-        for _ in 0..<450 {
+        for _ in 0..<420 {
             let t = Double.random(in: 0...1, using: &generator)
-            let point = armPoint(t: t, armAngle: armAngle, size: size)
             // Sum of two uniforms gives a bell shape, so stars bunch along the arm's spine.
-            let across = CGFloat.random(in: -1...1, using: &generator) + CGFloat.random(in: -1...1, using: &generator)
-            let scatter = across / 2 * armSpread(t: t, size: size)
-            let outward = atan2(point.y - size.height / 2, point.x - size.width / 2)
-            let centre = CGPoint(x: point.x + cos(outward) * scatter, y: point.y + sin(outward) * scatter)
-
-            let bright = Double.random(in: 0...1, using: &generator) < 0.08
-            let radius = bright ? CGFloat.random(in: 1.6...2.6, using: &generator)
-                                : CGFloat.random(in: 0.3...1.4, using: &generator)
-            let alpha = Double.random(in: 0.3...1, using: &generator) * starOpacity * (1 - 0.4 * t)
-            let tint = starTint(&generator)
-            guard depth == (bright ? .near : .mid) else { continue }
-            drawStar(in: &context, at: centre, radius: radius, tint: tint, alpha: alpha, halo: bright)
+            let across = (CGFloat.random(in: -1...1, using: &generator) + CGFloat.random(in: -1...1, using: &generator)) / 2
+            let centre = Spiral.scatteredPoint(t: t, armAngle: armAngle, across: across, size: size)
+            let radius = CGFloat.random(in: 0.3...1.4, using: &generator)
+            let alpha = Double.random(in: 0.3...1, using: &generator) * Spiral.starOpacity * (1 - 0.4 * t)
+            Spiral.drawStar(in: &context, at: centre, radius: radius, tint: Spiral.starTint(&generator),
+                            alpha: alpha, halo: false)
         }
     }
+}
 
-    private func starTint(_ generator: inout SeededGenerator) -> Color {
-        let roll = Double.random(in: 0...1, using: &generator)
-        if roll < 0.6 { return .white }
-        if roll < 0.85 { return Color(red: 0.78, green: 0.86, blue: 1.0) }
-        return Color(red: 1.0, green: 0.8, blue: 0.62)
+// MARK: Flowing stars
+
+/// The bright halo stars. Each starts at its own place on an arm and travels outward along it,
+/// fading in near the core and out near the edge, then starts again from the core.
+private struct FlowingStarsLayer: View {
+    /// Progress along the arm, 0...1, added to every star's starting point.
+    let flow: Double
+
+    private struct Star {
+        let armAngle: Double
+        let start: Double
+        let across: CGFloat
+        let radius: CGFloat
+        let alpha: Double
+        let tint: Color
     }
 
-    private func drawStar(in context: inout GraphicsContext, at centre: CGPoint, radius: CGFloat,
-                          tint: Color, alpha: Double, halo: Bool) {
-        if halo {
-            drawGlow(in: &context, at: centre, radius: radius * 4, tint: tint.opacity(alpha * 0.35))
+    private static let stars: [Star] = {
+        var generator = SeededGenerator(seed: 11)
+        return (0..<70).map { index in
+            Star(armAngle: Double(index % 2) * .pi,
+                 start: Double.random(in: 0...1, using: &generator),
+                 across: (CGFloat.random(in: -1...1, using: &generator) + CGFloat.random(in: -1...1, using: &generator)) / 2,
+                 radius: CGFloat.random(in: 1.6...2.6, using: &generator),
+                 alpha: Double.random(in: 0.3...1, using: &generator) * Spiral.starOpacity,
+                 tint: Spiral.starTint(&generator))
         }
-        let rect = CGRect(x: centre.x - radius, y: centre.y - radius, width: radius * 2, height: radius * 2)
-        context.fill(Path(ellipseIn: rect), with: .color(tint.opacity(alpha)))
-    }
+    }()
 
-    private func drawGlow(in context: inout GraphicsContext, at centre: CGPoint, radius: CGFloat, tint: Color) {
-        let rect = CGRect(x: centre.x - radius, y: centre.y - radius, width: radius * 2, height: radius * 2)
-        context.fill(Path(ellipseIn: rect),
-                     with: .radialGradient(Gradient(colors: [tint, .clear]), center: centre,
-                                           startRadius: 0, endRadius: radius))
+    var body: some View {
+        Canvas { context, size in
+            for star in Self.stars {
+                let t = (star.start + flow).truncatingRemainder(dividingBy: 1)
+                let centre = Spiral.scatteredPoint(t: t, armAngle: star.armAngle, across: star.across, size: size)
+                let endFade = min(1, t * 8, (1 - t) * 8)
+                let alpha = star.alpha * (1 - 0.4 * t) * endFade
+                Spiral.drawStar(in: &context, at: centre, radius: star.radius, tint: star.tint, alpha: alpha, halo: true)
+            }
+        }
     }
 }
 
