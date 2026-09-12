@@ -3,10 +3,18 @@ import UIKit
 import UserNotifications
 
 /// Rings the singing bowl: in the foreground via audio, and when locked via a notification.
-enum Bell {
+final class Bell: NSObject, AVAudioPlayerDelegate {
+    static let shared = Bell()
     static let soundFile = "bowl.wav"
     private static let notificationID = "sessionEnd"
-    private static var player: AVAudioPlayer?
+    private var player: AVAudioPlayer?
+
+    private override init() {
+        super.init()
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(handleInterruption),
+            name: AVAudioSession.interruptionNotification, object: AVAudioSession.sharedInstance())
+    }
 
     static func requestNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.sound, .alert]) { _, _ in }
@@ -29,12 +37,49 @@ enum Bell {
         center.removeDeliveredNotifications(withIdentifiers: [notificationID])
     }
 
-    static func ring() {
+    func ring() {
         UINotificationFeedbackGenerator().notificationOccurred(.success)
-        guard let url = Bundle.main.url(forResource: soundFile, withExtension: nil) else { return }
-        try? AVAudioSession.sharedInstance().setCategory(.playback)
-        try? AVAudioSession.sharedInstance().setActive(true)
+        guard let url = Bundle.main.url(forResource: Self.soundFile, withExtension: nil) else { return }
         player = try? AVAudioPlayer(contentsOf: url)
+        player?.delegate = self
+        activateSessionAndPlay()
+    }
+
+    /// Cuts a ringing bowl and hands audio back to other apps.
+    func stop() {
+        player?.stop()
+        player = nil
+        deactivateSession()
+    }
+
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        self.player = nil
+        deactivateSession()
+    }
+
+    /// A phone call or Siri stops the bowl. When the interruption ends, ring it again from the
+    /// start: a bowl resumed mid-decay sounds wrong, and the point is that the bell is heard.
+    @objc private func handleInterruption(_ notification: Notification) {
+        guard let info = notification.userInfo,
+              let typeValue = info[AVAudioSessionInterruptionTypeKey] as? UInt,
+              AVAudioSession.InterruptionType(rawValue: typeValue) == .ended,
+              let optionsValue = info[AVAudioSessionInterruptionOptionKey] as? UInt,
+              AVAudioSession.InterruptionOptions(rawValue: optionsValue).contains(.shouldResume),
+              let player, !player.isPlaying
+        else { return }
+        player.currentTime = 0
+        activateSessionAndPlay()
+    }
+
+    private func activateSessionAndPlay() {
+        let session = AVAudioSession.sharedInstance()
+        // Playback ignores the silent switch; ducking lowers other audio instead of stopping it.
+        try? session.setCategory(.playback, options: [.duckOthers])
+        try? session.setActive(true)
         player?.play()
+    }
+
+    private func deactivateSession() {
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
 }

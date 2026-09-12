@@ -65,12 +65,13 @@ struct SitView: View {
         Bell.cancelNotification()
         // The timer does not tick while the phone is locked. If the target passed more than
         // a couple of seconds ago the notification already rang, so do not ring twice.
-        if now.timeIntervalSince(endDate) < 2 { Bell.ring() }
+        if now.timeIntervalSince(endDate) < 2 { Bell.shared.ring() }
     }
 
     private func finish() {
         UIApplication.shared.isIdleTimerDisabled = false
         Bell.cancelNotification()
+        Bell.shared.stop()
         let end = Date()
         onFinish(Session(start: start, end: end, plannedSeconds: plannedSeconds, completed: end >= endDate))
     }

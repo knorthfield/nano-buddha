@@ -56,7 +56,9 @@ Health as Mindful Minutes (`HealthWriter.swift`).
 ## Assets
 `NanoBuddha/Resources/bowl.wav` — "Tibetan Bowl Struck #1", BigSoundBank, CC0,
 https://bigsoundbank.com/detail-1110-tibetan-bowl-struck.html, trimmed to 28 s
-(notification sounds must be under 30 s). BigSoundBank serves HTML to plain curl; the
+(notification sounds must be under 30 s) with a 1 s fade-in so the strike does not startle:
+`ffmpeg -i in.wav -af "afade=t=in:st=0:d=1:curve=hsin" -c:a pcm_s16le -ar 44100 -ac 1 out.wav`.
+BigSoundBank serves HTML to plain curl; the
 `/UPLOAD/bwf-en/<id>.wav` path with a browser User-Agent works.
 
 ## Tests
