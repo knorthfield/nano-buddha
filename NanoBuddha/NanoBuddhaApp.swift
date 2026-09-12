@@ -8,7 +8,6 @@ struct NanoBuddhaApp: App {
         WindowGroup {
             RootView()
                 .environment(store)
-                .preferredColorScheme(.dark)
         }
     }
 }

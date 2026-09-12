@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The one full-width action on each screen: Begin, End, Done. Dark tinted glass, same size everywhere.
+/// The one full-width action on each screen: Begin, End, Done. Tinted glass, same size everywhere.
 struct PrimaryButton: View {
     let title: String
     let action: () -> Void
@@ -12,7 +12,7 @@ struct PrimaryButton: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
         }
-        .buttonStyle(.glass(.clear.tint(.black.opacity(0.45))))
+        .buttonStyle(.glass(.clear.tint(Color("GlassTint"))))
         .padding(.horizontal, 48)
         .frame(maxWidth: 480)
     }

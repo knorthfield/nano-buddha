@@ -16,11 +16,10 @@ struct SitView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
             Starfield()
             Color.clear
                 .frame(width: 160, height: 160)
-                .glassEffect(.clear.tint(.black.opacity(0.45)), in: .circle)
+                .glassEffect(.clear.tint(Color("GlassTint")), in: .circle)
                 .overlay {
                     ZStack {
                         Circle().strokeBorder(

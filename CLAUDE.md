@@ -17,6 +17,9 @@ completed; one ended before it does not. Sessions are saved to `Documents/store.
 (`Store.swift` still reads the old `lastNominalMinutes` + `growthSeconds` keys) and to Apple
 Health as Mindful Minutes (`HealthWriter.swift`). History has a Copy week button that puts a
 markdown log of the last 7 days on the pasteboard (`WeekLog.swift`).
+The app follows the system appearance: dark mode is the spiral galaxy on black, light mode is
+grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `GlassTint` and
+`AccentColor` colour sets carry light and dark variants).
 
 ## Build and run
 - `project.yml` is the source of truth; `NanoBuddha.xcodeproj` is generated and git-ignored.
@@ -40,11 +43,15 @@ markdown log of the last 7 days on the pasteboard (`WeekLog.swift`).
 - xcodegen does not set `ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME`; without it in `project.yml`
   `Color.accentColor` is system blue, not the tan `AccentColor` colorset.
 - The app icon is `NanoBuddha/AppIcon.icon`, a hand-written Icon Composer bundle (`icon.json`
-  plus `Assets/hole.svg` and `Assets/stars.svg`). Do not add an `AppIcon.appiconset` next to it: two `AppIcon` assets
+  plus `Assets/hole.svg`, `Assets/stars.svg` for dark and `Assets/sand.svg` for light). Per-appearance
+  values go in `fill-specializations` / `image-name-specializations` arrays of
+  `{"appearance": "dark", "value": ...}` next to the light default; a `specializations` object inside
+  the property does not parse. `scripts/icon-stars.swift` (and `--light`) regenerate the SVGs. Do not add an `AppIcon.appiconset` next to it: two `AppIcon` assets
   conflict, and Xcode makes the flat fallbacks itself. Preview it with
   `"/Applications/Xcode.app/Contents/Applications/Icon Composer.app/Contents/Executables/ictool"
   NanoBuddha/AppIcon.icon --export-image --output-file out.png --platform iOS --rendition Default
-  --width 1024 --height 1024 --scale 1`. `xcrun ictool` is a different binary and does not render.
+  --width 1024 --height 1024 --scale 1` (`--rendition Dark` for dark mode). `xcrun ictool` is a
+  different binary and does not render.
 - After changing the icon, the simulator's notification banners can keep showing the old icon
   even after `simctl uninstall`. Restart SpringBoard:
   `xcrun simctl spawn booted launchctl kickstart -k system/com.apple.SpringBoard`. To see a

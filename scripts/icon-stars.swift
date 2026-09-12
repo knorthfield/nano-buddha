@@ -2,6 +2,9 @@
 // app icon. The geometry, seeds and palette are copied from Starfield.swift; keep them in step.
 //
 //   swift scripts/icon-stars.swift > NanoBuddha/AppIcon.icon/Assets/stars.svg
+//   swift scripts/icon-stars.swift --light > NanoBuddha/AppIcon.icon/Assets/sand.svg
+//
+// `--light` uses the paper palette: grains of sand on old paper, with the paper grain included.
 
 import Foundation
 
@@ -26,13 +29,16 @@ let canvasOffset = (iconSide - canvasSide) / 2
 /// App star radii are in points on a ~400 pt screen; scale them up to the 1024 px icon.
 let radiusScale = 3.0
 
+let light = CommandLine.arguments.contains("--light")
+
 let armTurns = 2.2 * Double.pi
 let starOpacity = 0.7
-let white = "#FFFFFF"
-let blueWhite = "#C7DBFF"
-let warm = "#FFCC9E"
-let accent = "#CC8C66"
-let violet = "#734DBF"
+// Palette.space / Palette.paper in Starfield.swift, as hex.
+let white = light ? "#8C6B47" : "#FFFFFF"
+let blueWhite = light ? "#735438" : "#C7DBFF"
+let warm = light ? "#A6804D" : "#FFCC9E"
+let accent = light ? "#8C5933" : "#CC8C66"
+let violet = light ? "#806B57" : "#734DBF"
 
 func armPoint(t: Double, armAngle: Double) -> Point {
     let innerRadius = canvasSide * 0.07
@@ -90,6 +96,23 @@ func star(at point: Point, radius: Double, tint: String, alpha: Double, halo: Bo
 }
 
 svg += "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1024\" height=\"1024\" viewBox=\"0 0 1024 1024\">\n"
+
+if light {
+    var paperGenerator = SeededGenerator(seed: 3)
+    for _ in 0..<8 {
+        let centre = Point(x: Double.random(in: 0...canvasSide, using: &paperGenerator),
+                           y: Double.random(in: 0...canvasSide, using: &paperGenerator))
+        let radius = Double.random(in: 0.15...0.4, using: &paperGenerator) * canvasSide
+        glow(at: centre, radius: radius, tint: white, opacity: 0.05)
+    }
+    for _ in 0..<2000 {
+        let centre = Point(x: Double.random(in: 0...canvasSide, using: &paperGenerator),
+                           y: Double.random(in: 0...canvasSide, using: &paperGenerator))
+        let radius = Double.random(in: 0.3...0.8, using: &paperGenerator)
+        let alpha = Double.random(in: 0.04...0.10, using: &paperGenerator)
+        star(at: centre, radius: radius, tint: starTint(&paperGenerator), alpha: alpha, halo: false)
+    }
+}
 
 var generator = SeededGenerator(seed: 7)
 
