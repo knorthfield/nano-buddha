@@ -15,7 +15,7 @@ enum Bell {
     static func scheduleNotification(at date: Date) {
         let content = UNMutableNotificationContent()
         content.title = "Nano Buddha"
-        content.body = "Your sit is complete."
+        content.body = "Your time has passed. Sit on, or end when you are ready."
         content.sound = UNNotificationSound(named: UNNotificationSoundName(soundFile))
         let seconds = max(1, date.timeIntervalSinceNow)
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: seconds, repeats: false)

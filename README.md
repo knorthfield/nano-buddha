@@ -5,8 +5,8 @@ An iPhone meditation timer that quietly lengthens your sits.
 You choose a nominal duration, say 10 minutes. The app never times exactly that. It adds a
 random offset of up to one minute either way, and a hidden base that grows by 15 seconds
 after every completed sit. The sit screen shows no time at all, so there is nothing to
-watch. A singing bowl rings at the end. Each sit is saved locally and written to Apple
-Health as Mindful Minutes.
+watch. A singing bowl rings when the time is up, and the sit carries on until you end it.
+Each sit is saved locally and written to Apple Health as Mindful Minutes.
 
 SwiftUI, iOS 26+, no third-party packages.
 

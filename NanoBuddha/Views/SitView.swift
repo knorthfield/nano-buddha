@@ -9,6 +9,7 @@ struct SitView: View {
     @State private var endDate = Date()
     @State private var breathing = false
     @State private var highlightTurning = false
+    @State private var bellRung = false
     private let tick = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -39,7 +40,7 @@ struct SitView: View {
                 .accessibilityHidden(true)
             VStack {
                 Spacer()
-                Button("End") { finish(completed: false) }
+                Button("End") { finish() }
                     .buttonStyle(.glass)
                     .padding(.bottom, 40)
             }
@@ -54,15 +55,23 @@ struct SitView: View {
             highlightTurning = !reduceMotion
         }
         .onReceive(tick) { now in
-            if now >= endDate { finish(completed: true) }
+            if now >= endDate && !bellRung { ringMarkerBell(at: now) }
         }
     }
 
-    private func finish(completed: Bool) {
+    /// The bell marks the target; the sit carries on until the user taps End.
+    private func ringMarkerBell(at now: Date) {
+        bellRung = true
+        Bell.cancelNotification()
+        // The timer does not tick while the phone is locked. If the target passed more than
+        // a couple of seconds ago the notification already rang, so do not ring twice.
+        if now.timeIntervalSince(endDate) < 2 { Bell.ring() }
+    }
+
+    private func finish() {
         UIApplication.shared.isIdleTimerDisabled = false
         Bell.cancelNotification()
-        if completed { Bell.ring() }
-        onFinish(Session(start: start, end: completed ? endDate : Date(),
-                         plannedSeconds: plannedSeconds, completed: completed))
+        let end = Date()
+        onFinish(Session(start: start, end: end, plannedSeconds: plannedSeconds, completed: end >= endDate))
     }
 }

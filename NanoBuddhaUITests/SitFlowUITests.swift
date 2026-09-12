@@ -13,7 +13,12 @@ final class SitFlowUITests: XCTestCase {
         let allowNotifications = springboard.buttons["Allow"]
         if allowNotifications.waitForExistence(timeout: 3) { allowNotifications.tap() }
 
-        // The -quickSit sit lasts 5 s; Done screen then asks for Health access.
+        // The -quickSit bell rings after 5 s; the sit carries on until End is tapped.
+        // Ending after the bell counts as complete. Done screen then asks for Health access.
+        let end = app.buttons["End"]
+        XCTAssertTrue(end.waitForExistence(timeout: 5))
+        sleep(7)
+        end.tap()
         let healthDeny = app.buttons["UIA.Health.DoNotAllow.Button"]
         if healthDeny.waitForExistence(timeout: 15) { healthDeny.tap() }
         // On a fresh install Health follows up with an "OK" alert that covers the Done screen.
