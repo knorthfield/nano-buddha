@@ -37,6 +37,15 @@ and saves to Health itself. `Model/Sync.swift` keeps the two stores the same ove
 WatchConnectivity: every save sends the snapshot as the application context, the other side
 merges it (`Store.merge`: union of sits by id, the more recently changed intended duration
 wins). The widget target does not compile `Sync.swift`.
+`NanoBuddhaTV` is the Apple TV app (`NanoBuddhaTV/`, tvOS 26, same bundle id as the iPhone app
+for universal purchase, not embedded in it). It compiles the shared `Sit`, `Store`, `Bell`,
+`PrimaryButton` and `Starfield`, and nothing else: tvOS has no HealthKit, WatchConnectivity,
+WidgetKit, pasteboard or alert notifications, so the TV store is standalone (`store.json` in
+Documents, not synced), there is no Health write, no Copy week, and the bowl is audio only
+(`Bell.swift` skips notifications and haptics with `#if os(tvOS)`; `Store.swift` guards
+WidgetKit with `canImport`). The home screen has no first-run picker, only the nudge row. The
+sit screen keeps the TV awake (`isIdleTimerDisabled`) and the remote's Menu button ends the sit
+(`.onExitCommand`) so a sit cannot run on behind the tvOS home screen.
 The app follows the system appearance: dark mode is the spiral galaxy on black, light mode is
 grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `GlassTint` and
 `AccentColor` colour sets carry light and dark variants).
@@ -48,6 +57,8 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
 - `scripts/test.sh` — unit tests and UI test.
 - `scripts/watch.sh` — build, then install and launch the watch app on the watch simulator
   (`WATCH_SIM_NAME` env var overrides the device). Extra arguments go to the app (`-quickSit`).
+- `scripts/tv.sh` — build, then install and launch the Apple TV app on the Apple TV simulator
+  (`TV_SIM_NAME` env var overrides the device). Extra arguments go to the app (`-quickSit`).
 - `.zed/tasks.json` (git-ignored, local only) — Zed tasks (Run on simulator, Build, Test) that call the scripts above.
 - `scripts/device.sh <udid>` — signed build and install on a real iPhone (UDID from `xcrun devicectl list devices`). Needs
   `DEVELOPMENT_TEAM = <team id>` in `Local.xcconfig` (git-ignored; `scripts/env.sh` creates a stub).
@@ -64,6 +75,18 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
 - The iOS scheme builds the embedded watch app, so it needs the watchOS simulator runtime too:
   `xcodebuild -downloadPlatform watchOS`. Without it even the iPhone build fails with "This
   scheme builds an embedded Apple Watch app. watchOS 26.5 must be installed".
+- The TV target needs the tvOS simulator runtime: `xcodebuild -downloadPlatform tvOS`. An older
+  runtime (tvOS 26.2) is not enough; Xcode 26.6 refuses the destination until 26.5 is installed.
+- The tvOS app icon is not the Icon Composer bundle: tvOS wants an
+  `App Icon & Top Shelf Image.brandassets` catalog (`NanoBuddhaTV/Assets.xcassets`) of layered
+  images, 400x240 (@1x, @2x) and 1280x768. The two layers are `stars.svg` on black (Back) and
+  `hole.svg` (Front) from `AppIcon.icon/Assets`, rendered with `rsvg-convert` at the square size
+  and cropped to height with `sips -c`. `ASSETCATALOG_COMPILER_APPICON_NAME` on the TV target
+  names the brandassets. Top Shelf images are not provided.
+- `xcrun simctl ui <tv udid> appearance light` fails on the tvOS simulator ("Runtime does not
+  support userInterfaceStyle"); the TV light palette has only been checked on the iPhone. There
+  is no CLI for the Siri Remote either: `osascript` key codes to the Simulator app do it
+  (36 = select, 53 = Menu, 125 = down) after `tell application "Simulator" to activate`.
 - Running the watch app alone needs no paired simulators. Testing sync does: `xcrun simctl pair
   <watch udid> <iphone udid>` (`simctl list pairs`). The simulator has no haptics.
 - `WKExtendedRuntimeSession.notifyUser(hapticType:)` works only for `alarm` sessions started

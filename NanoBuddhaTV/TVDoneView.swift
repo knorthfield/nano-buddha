@@ -1,0 +1,28 @@
+import SwiftUI
+
+struct TVDoneView: View {
+    let session: Session
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(spacing: 32) {
+            Spacer()
+            Image(systemName: session.completed ? "checkmark" : "pause")
+                .font(.system(size: 56, weight: .light))
+                .foregroundStyle(Color.accentColor)
+                .frame(width: 160, height: 160)
+                .glassEffect(.clear.tint(Color("GlassTint")), in: .circle)
+            Text(session.completed ? "Session complete" : "Sit complete")
+                .font(.title)
+            Text("\(max(1, session.actualMinutes)) minutes")
+                .font(.title2)
+                .foregroundStyle(.secondary)
+            Spacer()
+            PrimaryButton(title: "Done", action: onDismiss)
+                .padding(.bottom, 60)
+        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Starfield())
+    }
+}

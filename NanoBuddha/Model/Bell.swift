@@ -2,11 +2,12 @@ import AVFoundation
 import UserNotifications
 #if os(watchOS)
 import WatchKit
-#else
+#elseif os(iOS)
 import UIKit
 #endif
 
 /// Rings the singing bowl: in the foreground via audio, and when locked via a notification.
+/// Apple TV has no lock and no alert notifications, so there the bowl is audio only.
 final class Bell: NSObject, AVAudioPlayerDelegate {
     static let shared = Bell()
     static let soundFile = "bowl.wav"
@@ -48,10 +49,13 @@ final class Bell: NSObject, AVAudioPlayerDelegate {
     }
 
     static func requestNotificationPermission() {
+        #if !os(tvOS)
         UNUserNotificationCenter.current().requestAuthorization(options: [.sound, .alert]) { _, _ in }
+        #endif
     }
 
     static func scheduleNotification(for moment: Moment, at date: Date) {
+        #if !os(tvOS)
         let content = UNMutableNotificationContent()
         content.title = "Nano Buddha"
         content.body = moment.notificationBody
@@ -66,12 +70,15 @@ final class Bell: NSObject, AVAudioPlayerDelegate {
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: seconds, repeats: false)
         let request = UNNotificationRequest(identifier: moment.notificationID, content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request)
+        #endif
     }
 
     static func cancelNotification(for moment: Moment) {
+        #if !os(tvOS)
         let center = UNUserNotificationCenter.current()
         center.removePendingNotificationRequests(withIdentifiers: [moment.notificationID])
         center.removeDeliveredNotifications(withIdentifiers: [moment.notificationID])
+        #endif
     }
 
     static func cancelNotifications() {
@@ -81,7 +88,7 @@ final class Bell: NSObject, AVAudioPlayerDelegate {
     func ring() {
         #if os(watchOS)
         WKInterfaceDevice.current().play(.notification)
-        #else
+        #elseif os(iOS)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
         #endif
         guard Self.soundEnabled,

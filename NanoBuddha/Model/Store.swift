@@ -1,6 +1,8 @@
 import Foundation
 import Observation
+#if canImport(WidgetKit)
 import WidgetKit
+#endif
 
 @Observable
 final class Store {
@@ -114,7 +116,9 @@ final class Store {
     private func save() {
         guard let data = try? JSONEncoder().encode(snapshot) else { return }
         try? data.write(to: fileURL, options: .atomic)
+        #if canImport(WidgetKit)
         WidgetCenter.shared.reloadAllTimelines()
+        #endif
         didSave?()
     }
 }

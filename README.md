@@ -1,6 +1,6 @@
 # Nano Buddha
 
-An iPhone and iPad meditation timer that quietly lengthens your sits.
+An iPhone, iPad, Apple Watch and Apple TV meditation timer that quietly lengthens your sits.
 
 You choose a nominal duration, say 10 minutes. The app never times exactly that. It adds a
 random offset of up to one minute either way, and a hidden base that grows by 15 seconds
@@ -8,7 +8,7 @@ after every completed sit. The sit screen shows no time at all, so there is noth
 watch. A singing bowl rings when the time is up, and the sit carries on until you end it.
 Each sit is saved locally and written to Apple Health as Mindful Minutes.
 
-SwiftUI, iOS 26+, no third-party packages.
+SwiftUI, iOS 26+ (watchOS 26 and tvOS 26 for the watch and TV apps), no third-party packages.
 
 ## Requirements
 
@@ -24,6 +24,8 @@ The Xcode project is generated from `project.yml` and is not committed. The scri
 scripts/build.sh   # generate the project and build for the simulator
 scripts/run.sh     # build, then install and launch on the simulator
 scripts/test.sh    # unit tests and a UI test of a full sit
+scripts/watch.sh   # build, then install and launch the watch app on the watch simulator
+scripts/tv.sh      # build, then install and launch the Apple TV app on the Apple TV simulator
 ```
 
 Set `SIM_NAME` to use a different simulator, for example `SIM_NAME="iPhone 17 Pro" scripts/run.sh` or `SIM_NAME="iPad Air 11-inch (M4)" scripts/run.sh`.
@@ -41,6 +43,8 @@ Set `SIM_NAME` to use a different simulator, for example `SIM_NAME="iPhone 17 Pr
 - `NanoBuddha/Model` — `DurationPlanner` (hidden duration), `Store` (JSON persistence),
   `HealthWriter`, `Bell` (bowl sound, haptic, and the local notification used when locked)
 - `NanoBuddha/Views` — Home, Sit, Done, History
+- `NanoBuddhaWidgets`, `NanoBuddhaWatch`, `NanoBuddhaTV` — the widget extension, the watch app
+  and the Apple TV app, each compiling the shared model files it can use
 - `NanoBuddhaTests`, `NanoBuddhaUITests`
 
 ## Credits
