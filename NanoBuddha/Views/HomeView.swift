@@ -35,10 +35,7 @@ struct HomeView: View {
                     .buttonStyle(.glass)
                     .buttonBorderShape(.circle)
                 }
-                PrimaryButton(title: "Begin") {
-                    Bell.requestNotificationPermission()
-                    onStart()
-                }
+                PrimaryButton(title: "Begin", action: onStart)
                 Spacer()
                 if !store.sessions.isEmpty {
                     Text("\(store.sessions.count) sits · \(store.totalSeconds / 60) minutes")

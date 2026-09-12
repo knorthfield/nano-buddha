@@ -13,6 +13,9 @@ targets:
     platform: iOS
     sources:
       - NanoBuddha
+    dependencies:
+      - target: NanoBuddhaWidgets
+        embed: true
     info:
       path: NanoBuddha/Info.plist
       properties:
@@ -29,6 +32,7 @@ targets:
       properties:
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.access: []
+        com.apple.security.application-groups: [group.com.krisnorthfield.NanoBuddha]
     settings:
       base:
         SWIFT_VERSION: "5.9"
@@ -36,6 +40,38 @@ targets:
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         GENERATE_INFOPLIST_FILE: NO
+  NanoBuddhaWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - NanoBuddhaWidgets
+      - NanoBuddha/Model/Store.swift
+      - NanoBuddha/Model/Session.swift
+      - NanoBuddha/Model/DurationPlanner.swift
+      - NanoBuddha/Model/BeginSitIntent.swift
+      - NanoBuddha/Resources/Assets.xcassets
+    info:
+      path: NanoBuddhaWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: Nano Buddha
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: NanoBuddhaWidgets/NanoBuddhaWidgets.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.krisnorthfield.NanoBuddha]
+    settings:
+      base:
+        # iOS ignores an extension whose bundle id is not prefixed by the app's.
+        PRODUCT_BUNDLE_IDENTIFIER: com.krisnorthfield.NanoBuddha.NanoBuddhaWidgets
+        SWIFT_VERSION: "5.9"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGN_STYLE: Automatic
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        GENERATE_INFOPLIST_FILE: NO
+        SKIP_INSTALL: YES
   NanoBuddhaTests:
     type: bundle.unit-test
     platform: iOS
@@ -63,6 +99,7 @@ schemes:
     build:
       targets:
         NanoBuddha: all
+        NanoBuddhaWidgets: all
         NanoBuddhaTests: [test]
         NanoBuddhaUITests: [test]
     run:

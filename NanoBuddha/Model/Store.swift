@@ -1,11 +1,14 @@
 import Foundation
 import Observation
+import WidgetKit
 
 @Observable
 final class Store {
+    static let appGroup = "group.com.krisnorthfield.NanoBuddha"
+
     private(set) var sessions: [Session] = []
     /// The duration the user intends to sit. Grows by 15 s per completed sit.
-    var intendedSeconds = 600 { didSet { save() } }
+    var intendedSeconds = 600 { didSet { if !isLoading { save() } } }
 
     private struct Snapshot: Codable {
         var sessions: [Session]
@@ -16,9 +19,23 @@ final class Store {
     }
 
     private let fileURL: URL
+    private var isLoading = false
 
-    init(fileURL: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        .appendingPathComponent("store.json")) {
+    /// The store lives in the app group so the widget can read it. The first launch after the
+    /// move takes the old file from Documents with it.
+    static var defaultFileURL: URL {
+        let files = FileManager.default
+        let documents = files.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("store.json")
+        guard let group = files.containerURL(forSecurityApplicationGroupIdentifier: appGroup)?
+            .appendingPathComponent("store.json") else { return documents }
+        if !files.fileExists(atPath: group.path), files.fileExists(atPath: documents.path) {
+            try? files.moveItem(at: documents, to: group)
+        }
+        return group
+    }
+
+    init(fileURL: URL = Store.defaultFileURL) {
         self.fileURL = fileURL
         load()
     }
@@ -41,6 +58,8 @@ final class Store {
     private func load() {
         guard let data = try? Data(contentsOf: fileURL),
               let snapshot = try? JSONDecoder().decode(Snapshot.self, from: data) else { return }
+        isLoading = true
+        defer { isLoading = false }
         sessions = snapshot.sessions
         intendedSeconds = snapshot.intendedSeconds
             ?? (snapshot.lastNominalMinutes ?? 10) * 60 + (snapshot.growthSeconds ?? 0)
@@ -50,5 +69,6 @@ final class Store {
         let snapshot = Snapshot(sessions: sessions, intendedSeconds: intendedSeconds)
         guard let data = try? JSONEncoder().encode(snapshot) else { return }
         try? data.write(to: fileURL, options: .atomic)
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }

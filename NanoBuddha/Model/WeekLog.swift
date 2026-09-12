@@ -4,7 +4,7 @@ import Foundation
 enum WeekLog {
     static func markdown(sessions: [Session], now: Date = .now, calendar: Calendar = .current) -> String {
         let weekStart = calendar.date(byAdding: .day, value: -7, to: now)!
-        let week = sessions.filter { $0.start >= weekStart && $0.start < now }.sorted { $0.start < $1.start }
+        let week = sessions.inLast(days: 7, now: now, calendar: calendar)
         let totalSeconds = week.reduce(0) { $0 + $1.actualSeconds }
         let totalMinutes = Int((Double(totalSeconds) / 60).rounded())
 

@@ -13,10 +13,17 @@ the phone down; then a singing bowl rings to open the sit. The sit and the targe
 from that opening bell. The bowl rings again when the target passes (`Bell.swift`: AVAudioPlayer
 in the foreground, a local notification with the same sound if locked; one notification per
 bell). The sit carries on until the user taps End. A sit ended after the target bell counts as
-completed; one ended before it does not. Sessions are saved to `Documents/store.json`
-(`Store.swift` still reads the old `lastNominalMinutes` + `growthSeconds` keys) and to Apple
-Health as Mindful Minutes (`HealthWriter.swift`). History has a Copy week button that puts a
+completed; one ended before it does not. Sessions are saved to `store.json` in the app group
+container `group.com.krisnorthfield.NanoBuddha` (`Store.swift` moves an old `Documents/store.json`
+there on first launch and still reads the old `lastNominalMinutes` + `growthSeconds` keys) and to
+Apple Health as Mindful Minutes (`HealthWriter.swift`). History has a Copy week button that puts a
 markdown log of the last 7 days on the pasteboard (`WeekLog.swift`).
+`NanoBuddhaWidgets` is a WidgetKit extension: one widget (small home screen, lock screen
+circular/rectangular/inline) with the intended minutes and the last 7 days, and a Control Centre
+button "Begin sit" (`BeginSitIntent`, `openAppWhenRun`). The intent writes a timestamp file
+`sitRequest` in the app group; `RootView` consumes it on scene activation or on
+`SitRequest.didPost` and starts a sit. (A flag in app-group `UserDefaults` lost writes on the
+simulator, hence the file.) The store calls `WidgetCenter.reloadAllTimelines()` on every save.
 The app follows the system appearance: dark mode is the spiral galaxy on black, light mode is
 grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `GlassTint` and
 `AccentColor` colour sets carry light and dark variants).
@@ -40,6 +47,18 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
 - Two simulators can share the name "iPhone 17" (one per runtime). The scripts pass `OS=latest`
   to pick the newest one.
 - Every test target needs `GENERATE_INFOPLIST_FILE: YES` in `project.yml` or signing fails.
+- The widget extension's bundle id must be prefixed by the app's
+  (`com.krisnorthfield.NanoBuddha.NanoBuddhaWidgets`), set explicitly in `project.yml`; xcodegen's
+  default `com.krisnorthfield.NanoBuddhaWidgets` makes iOS ignore the extension silently.
+- No CLI can place a widget or control on the simulator. Add it by hand in the Simulator app
+  (long-press the Home Screen > Edit > Add Widget; Control Centre > + > Add a Control) or drive
+  SpringBoard from a throwaway XCUITest (`XCUIApplication(bundleIdentifier: "com.apple.springboard")`,
+  long-press an empty spot by coordinate, tap Edit, "Add Widget", search "Nano"), then screenshot
+  with `simctl io`. To exercise the Control Centre path without the control, write the current
+  Unix time to `<group container>/sitRequest` (`xcrun simctl get_app_container <udid>
+  com.krisnorthfield.NanoBuddha groups`) and launch the app: it opens on the sit screen.
+- Right after `simctl install`, `simctl launch` can fail with "Application failed preflight checks"
+  while the extension registers. Wait a few seconds or uninstall and reinstall.
 - xcodegen does not set `ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME`; without it in `project.yml`
   `Color.accentColor` is system blue, not the tan `AccentColor` colorset.
 - The app icon is `NanoBuddha/AppIcon.icon`, a hand-written Icon Composer bundle (`icon.json`
@@ -76,7 +95,7 @@ BigSoundBank serves HTML to plain curl; the
 `/UPLOAD/bwf-en/<id>.wav` path with a browser User-Agent works.
 
 ## Tests
-- `NanoBuddhaTests` — unit tests for `DurationPlanner` and `Store`.
+- `NanoBuddhaTests` — unit tests for `DurationPlanner`, `Store`, `WeekLog` and `SitRequest`.
 - `NanoBuddhaUITests/SitFlowUITests.swift` — launches with `-quickSit` (a 5 s sit), taps Begin,
   answers the notification prompt (lives in SpringBoard) and the Health prompt (part of the
   app's hierarchy, identifier `UIA.Health.DoNotAllow.Button`), then checks Done and History, and that Copy week puts the week log on the pasteboard.
