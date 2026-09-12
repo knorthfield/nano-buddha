@@ -27,6 +27,7 @@ targets:
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "1"
         UILaunchScreen: {}
+        NSSupportsLiveActivities: true
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UISupportedInterfaceOrientations~ipad: [UIInterfaceOrientationPortrait, UIInterfaceOrientationPortraitUpsideDown, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
         NSHealthUpdateUsageDescription: Nano Buddha saves your meditation minutes to Health as Mindful Minutes.
@@ -53,6 +54,7 @@ targets:
       - NanoBuddha/Model/Session.swift
       - NanoBuddha/Model/DurationPlanner.swift
       - NanoBuddha/Model/BeginSitIntent.swift
+      - NanoBuddha/Model/SitActivity.swift
       - NanoBuddha/Resources/Assets.xcassets
     info:
       path: NanoBuddhaWidgets/Info.plist

@@ -24,6 +24,8 @@
 	<string>Nano Buddha saves your meditation minutes to Health as Mindful Minutes.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Nano Buddha saves your meditation minutes to Health as Mindful Minutes.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>

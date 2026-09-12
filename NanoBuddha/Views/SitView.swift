@@ -45,15 +45,19 @@ struct SitView: View {
         .statusBarHidden()
         .onAppear {
             sit.start(settlingSeconds: settlingSeconds, plannedSeconds: plannedSeconds)
+            SitActivity.start()
             UIApplication.shared.isIdleTimerDisabled = true
             breathing = !reduceMotion
             highlightTurning = !reduceMotion
         }
         .onReceive(tick) { now in sit.tick(now: now) }
+        // The End button on the Live Activity runs its intent in this process.
+        .onReceive(NotificationCenter.default.publisher(for: SitActivity.endRequested)) { _ in finish() }
     }
 
     private func finish() {
         UIApplication.shared.isIdleTimerDisabled = false
+        SitActivity.end()
         onFinish(sit.finish())
     }
 }

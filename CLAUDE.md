@@ -28,6 +28,13 @@ Shortcut, so Siri ("Begin a sit in Nano Buddha"), Spotlight, the Shortcuts app a
 button can begin a sit on the iPhone and the watch (`WatchRootView` consumes the request the
 same way). The provider is compiled into the two apps only, not the widget extension or the TV.
 The store calls `WidgetCenter.reloadAllTimelines()` on every save.
+A running sit has a Live Activity (`Model/SitActivity.swift`, `NanoBuddhaWidgets/SitActivityWidget.swift`,
+`NSSupportsLiveActivities` in `project.yml`): lock screen banner and Dynamic Island show "Sitting"
+and an End button, never the time. `EndSitIntent` is a `LiveActivityIntent`, so it runs in the app
+process and posts `SitActivity.endRequested`, which `SitView` handles like a tap on End. If the app
+was killed mid-sit nobody hears it; the intent still ends the activity and removes the pending bell
+notifications, and the sit is lost (the phase was never persisted). `SitActivity.swift` is compiled
+into the iPhone app and the widget extension only.
 `NanoBuddhaWatch` is the Apple Watch app (single-target, embedded under `Watch/` in the iOS
 bundle, bundle id `com.krisnorthfield.NanoBuddha.watchkitapp`). It runs the same sit through the
 shared `Sit` model (`Model/Sit.swift`: settling silence, opening bell, target bell, End). Bells
@@ -107,6 +114,10 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
   with `simctl io`. To exercise the Control Centre path without the control, write the current
   Unix time to `<group container>/sitRequest` (`xcrun simctl get_app_container <udid>
   com.krisnorthfield.NanoBuddha groups`) and launch the app: it opens on the sit screen.
+- `osascript` keystrokes to Simulator.app (cmd+shift+H, cmd+L) did nothing here, so the Live
+  Activity is checked from the UI test (`testEndFromTheLiveActivity`): `XCUIDevice.shared.press(.home)`,
+  a 1 s press on the island at normalized (0.5, 0.03) expands it, and `springboard.buttons["End"]`
+  is tappable there. Coordinates take a `CGVector`, not a `CGPoint`.
 - Right after `simctl install`, `simctl launch` can fail with "Application failed preflight checks"
   while the extension registers. Wait a few seconds or uninstall and reinstall.
 - xcodegen does not set `ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME`; without it in `project.yml`
@@ -150,6 +161,7 @@ BigSoundBank serves HTML to plain curl; the
 - `NanoBuddhaUITests/SitFlowUITests.swift` — launches with `-quickSit` (a 5 s sit), taps Begin,
   answers the notification prompt (lives in SpringBoard) and the Health prompt (part of the
   app's hierarchy, identifier `UIA.Health.DoNotAllow.Button`), then checks Done and History, and that Copy week puts the week log on the pasteboard.
+  A second test ends the sit from the expanded Dynamic Island.
 
 ## Git
 - Commits use the GitHub noreply address set in the repo-local git config. The GitHub account
