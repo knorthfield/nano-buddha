@@ -1,6 +1,6 @@
 # Nano Buddha
 
-An iPhone meditation timer that quietly lengthens your sits.
+An iPhone and iPad meditation timer that quietly lengthens your sits.
 
 You choose a nominal duration, say 10 minutes. The app never times exactly that. It adds a
 random offset of up to one minute either way, and a hidden base that grows by 15 seconds
@@ -26,7 +26,7 @@ scripts/run.sh     # build, then install and launch on the simulator
 scripts/test.sh    # unit tests and a UI test of a full sit
 ```
 
-Set `SIM_NAME` to use a different simulator, for example `SIM_NAME="iPhone 17 Pro" scripts/run.sh`.
+Set `SIM_NAME` to use a different simulator, for example `SIM_NAME="iPhone 17 Pro" scripts/run.sh` or `SIM_NAME="iPad Air 11-inch (M4)" scripts/run.sh`.
 
 ## Run on a real iPhone
 

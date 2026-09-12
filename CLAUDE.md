@@ -1,6 +1,6 @@
 # Nano Buddha
 
-iPhone meditation timer. SwiftUI, iOS 26+, no third-party packages. The Xcode GUI is never opened.
+iPhone and iPad meditation timer. SwiftUI, iOS 26+, no third-party packages. The Xcode GUI is never opened.
 Public repo: https://github.com/knorthfield/nano-buddha (MIT).
 
 ## What it does

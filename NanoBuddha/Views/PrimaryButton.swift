@@ -14,5 +14,6 @@ struct PrimaryButton: View {
         }
         .buttonStyle(.glass(.clear.tint(.black.opacity(0.45))))
         .padding(.horizontal, 48)
+        .frame(maxWidth: 480)
     }
 }
