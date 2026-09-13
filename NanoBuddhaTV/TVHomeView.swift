@@ -24,11 +24,11 @@ struct TVHomeView: View {
                 .buttonBorderShape(.circle)
                 PrimaryButton(title: "Begin", action: onStart)
                     .focused($beginFocused)
-                NavigationLink("History") { TVHistoryView() }
+                NavigationLink("History") { HistoryView() }
                     .buttonStyle(.glass)
                 Spacer()
                 if !store.sessions.isEmpty {
-                    Text("\(store.sessions.count) sits · \(store.totalSeconds / 60) minutes")
+                    Text("\(store.sessions.count) sits · \(store.totalMinutes) minutes")
                         .foregroundStyle(.secondary)
                 }
             }

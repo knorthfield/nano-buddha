@@ -7,8 +7,7 @@ struct SitView: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var sit = Sit()
-    @State private var breathing = false
-    @State private var highlightTurning = false
+    @State private var animating = false
     private let tick = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -30,11 +29,11 @@ struct SitView: View {
                             .blur(radius: 10)
                             .offset(x: -30, y: -32)
                     }
-                    .rotationEffect(.degrees(highlightTurning ? 360 : 0))
-                    .animation(.linear(duration: 90).repeatForever(autoreverses: false), value: highlightTurning)
+                    .rotationEffect(.degrees(animating ? 360 : 0))
+                    .animation(.linear(duration: 90).repeatForever(autoreverses: false), value: animating)
                 }
-                .scaleEffect(breathing ? 1.08 : 1)
-                .animation(.easeInOut(duration: 6).repeatForever(autoreverses: true), value: breathing)
+                .scaleEffect(animating ? 1.08 : 1)
+                .animation(.easeInOut(duration: 6).repeatForever(autoreverses: true), value: animating)
                 .accessibilityHidden(true)
             VStack {
                 Spacer()
@@ -47,8 +46,7 @@ struct SitView: View {
             sit.start(settlingSeconds: settlingSeconds, plannedSeconds: plannedSeconds)
             SitActivity.start()
             UIApplication.shared.isIdleTimerDisabled = true
-            breathing = !reduceMotion
-            highlightTurning = !reduceMotion
+            animating = !reduceMotion
         }
         .onReceive(tick) { now in sit.tick(now: now) }
         // The End button on the Live Activity runs its intent in this process.

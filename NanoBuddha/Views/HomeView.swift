@@ -38,7 +38,7 @@ struct HomeView: View {
                 PrimaryButton(title: "Begin", action: onStart)
                 Spacer()
                 if !store.sessions.isEmpty {
-                    Text("\(store.sessions.count) sits · \(store.totalSeconds / 60) minutes")
+                    Text("\(store.sessions.count) sits · \(store.totalMinutes) minutes")
                         .foregroundStyle(.secondary)
                 }
             }

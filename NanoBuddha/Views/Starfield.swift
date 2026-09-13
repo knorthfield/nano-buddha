@@ -12,10 +12,10 @@ struct Starfield: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var angle = 0.0
     @State private var flow = 0.0
-    private let frameRate = 30.0
+    private static let frameRate = 30.0
     /// How long a bright star of average speed takes to travel the full length of an arm.
     private let flowSecondsPerArm = 180.0
-    private let tick = Timer.publish(every: 1 / 30, on: .main, in: .common).autoconnect()
+    private let tick = Timer.publish(every: 1 / Starfield.frameRate, on: .main, in: .common).autoconnect()
 
     var body: some View {
         let palette = colorScheme == .dark ? Palette.space : Palette.paper
@@ -34,8 +34,8 @@ struct Starfield: View {
         .accessibilityHidden(true)
         .onReceive(tick) { _ in
             guard !reduceMotion else { return }
-            angle -= 360 / secondsPerTurn / frameRate
-            flow += 1 / flowSecondsPerArm / frameRate
+            angle -= 360 / secondsPerTurn / Self.frameRate
+            flow += 1 / flowSecondsPerArm / Self.frameRate
         }
     }
 }

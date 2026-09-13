@@ -2,7 +2,9 @@ import SwiftUI
 
 struct HistoryView: View {
     @Environment(Store.self) private var store
+    #if !os(tvOS)
     @State private var copied = false
+    #endif
 
     var body: some View {
         List {
@@ -28,9 +30,12 @@ struct HistoryView: View {
                 }
             }
         }
-        .scrollContentBackground(.hidden)
+        #if !os(tvOS)
+        .scrollContentBackground(.hidden)  // Not on tvOS, where the list is already clear.
+        #endif
         .background(Starfield())
         .navigationTitle("History")
+        #if !os(tvOS)
         .toolbar {
             Button(copied ? "Copied" : "Copy week", systemImage: copied ? "checkmark" : "doc.on.doc") {
                 #if os(macOS)
@@ -47,5 +52,6 @@ struct HistoryView: View {
             }
             .accessibilityIdentifier("CopyWeek")
         }
+        #endif
     }
 }

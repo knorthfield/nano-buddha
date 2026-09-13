@@ -64,7 +64,8 @@ builds; the simulator only syncs when an iCloud account is signed in via Setting
 that), and without one the key-value calls are silent no-ops.
 `NanoBuddhaTV` is the Apple TV app (`NanoBuddhaTV/`, tvOS 26, same bundle id as the iPhone app
 for universal purchase, not embedded in it). It compiles the shared `Sit`, `Store`, `Bell`,
-`CloudSync`, `PrimaryButton` and `Starfield`, and nothing else: tvOS has no HealthKit, WatchConnectivity,
+`CloudSync`, `PrimaryButton`, `Starfield` and `HistoryView` (no Copy week, `#if !os(tvOS)`), and
+nothing else: tvOS has no HealthKit, WatchConnectivity,
 WidgetKit, pasteboard or alert notifications, so the TV store lives in Documents and syncs only
 over iCloud (`CloudSync`, no WatchConnectivity), there is no Health write, no Copy week, and the
 bowl is audio only

@@ -158,6 +158,7 @@ targets:
       - NanoBuddha/Model/CloudSync.swift
       - NanoBuddha/Views/PrimaryButton.swift
       - NanoBuddha/Views/Starfield.swift
+      - NanoBuddha/Views/HistoryView.swift
       - NanoBuddha/Resources/bowl.wav
       - NanoBuddha/Resources/Assets.xcassets
       - NanoBuddhaTV/Assets.xcassets

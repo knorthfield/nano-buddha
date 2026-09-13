@@ -1,9 +1,7 @@
 import Foundation
-import Observation
 
 /// The timing of one sit: the settling silence, the opening bell, the target bell and End.
 /// Shared by the iPhone and the watch; each view owns its screen and the 1 s tick.
-@Observable
 final class Sit {
     private(set) var sitStart = Date()
     private(set) var endDate = Date()
