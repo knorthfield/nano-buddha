@@ -8,6 +8,7 @@ import UIKit
 
 /// Rings the singing bowl: in the foreground via audio, and when locked via a notification.
 /// Apple TV has no lock and no alert notifications, so there the bowl is audio only.
+/// The Mac has no AVAudioSession: the bowl plays without a session, notifications as on the phone.
 final class Bell: NSObject, AVAudioPlayerDelegate {
     static let shared = Bell()
     static let soundFile = "bowl.wav"
@@ -43,9 +44,11 @@ final class Bell: NSObject, AVAudioPlayerDelegate {
     }
     private override init() {
         super.init()
+        #if !os(macOS)
         NotificationCenter.default.addObserver(
             self, selector: #selector(handleInterruption),
             name: AVAudioSession.interruptionNotification, object: AVAudioSession.sharedInstance())
+        #endif
     }
 
     static func requestNotificationPermission() {
@@ -110,6 +113,7 @@ final class Bell: NSObject, AVAudioPlayerDelegate {
         deactivateSession()
     }
 
+    #if !os(macOS)
     /// A phone call or Siri stops the bowl. When the interruption ends, ring it again from the
     /// start: a bowl resumed mid-decay sounds wrong, and the point is that the bell is heard.
     @objc private func handleInterruption(_ notification: Notification) {
@@ -135,4 +139,8 @@ final class Bell: NSObject, AVAudioPlayerDelegate {
     private func deactivateSession() {
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
+    #else
+    private func activateSessionAndPlay() { player?.play() }
+    private func deactivateSession() {}
+    #endif
 }

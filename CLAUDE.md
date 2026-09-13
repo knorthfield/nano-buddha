@@ -1,6 +1,6 @@
 # Nano Buddha
 
-iPhone and iPad meditation timer. SwiftUI, iOS 26+, no third-party packages. The Xcode GUI is never opened.
+iPhone and iPad meditation timer, with Apple Watch, Apple TV and Mac apps. SwiftUI, iOS 26+, no third-party packages. The Xcode GUI is never opened.
 Public repo: https://github.com/knorthfield/nano-buddha (MIT).
 
 ## What it does
@@ -72,6 +72,19 @@ bowl is audio only
 WidgetKit with `canImport`). The home screen has no first-run picker, only the nudge row. The
 sit screen keeps the TV awake (`isIdleTimerDisabled`) and the remote's Menu button ends the sit
 (`.onExitCommand`) so a sit cannot run on behind the tvOS home screen.
+`NanoBuddhaMac` is the native Mac app (`NanoBuddhaMac/`, macOS 26, same bundle id as the iPhone
+app, not Catalyst). Like the TV it compiles only the shared `Sit`, `Store`, `Bell`, `CloudSync`,
+`WeekLog`, `PrimaryButton` and `Starfield`: no HealthKit, WatchConnectivity, widgets, App Shortcut
+or Live Activity on the Mac. The store lives in the sandbox container's Documents (`Store.swift`
+returns it with `#if os(macOS)`: the group container path exists on the Mac even without the
+entitlement, and the sandbox then refuses the write) and syncs over iCloud only. The bowl plays
+through `AVAudioPlayer` without an `AVAudioSession` (none on macOS, `#if !os(macOS)` in
+`Bell.swift`), and the bells also arrive as notifications when the app is in the background. The
+sit view holds a `ProcessInfo` activity (`idleSystemSleepDisabled`) so the Mac does not sleep
+mid-sit, and Escape ends the sit (`.keyboardShortcut(.cancelAction)` on End; `.onExitCommand`
+did nothing there). Copy week uses `NSPasteboard`. The window opens landscape (900 by 600);
+`WindowGroup(id: "main")` because a frame stored under the unnamed scene id kept coming back
+after the preferences were cleared. The home screen has no first-run picker, only the nudge row.
 The app follows the system appearance: dark mode is the spiral galaxy on black, light mode is
 grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `GlassTint` and
 `AccentColor` colour sets carry light and dark variants).
@@ -85,6 +98,10 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
   (`WATCH_SIM_NAME` env var overrides the device). Extra arguments go to the app (`-quickSit`).
 - `scripts/tv.sh` — build, then install and launch the Apple TV app on the Apple TV simulator
   (`TV_SIM_NAME` env var overrides the device). Extra arguments go to the app (`-quickSit`).
+- `scripts/mac.sh` — signed build of the Mac app, then open it on this Mac. Extra arguments go
+  to the app (`-quickSit`). Needs `DEVELOPMENT_TEAM` in `Local.xcconfig`: the iCloud entitlement
+  needs a Mac provisioning profile, which `-allowProvisioningUpdates
+  -allowProvisioningDeviceRegistration` create (the Mac itself has to be registered as a device).
 - `.zed/tasks.json` (git-ignored, local only) — Zed tasks (Run on simulator, Build, Test) that call the scripts above.
 - `scripts/device.sh <udid>` — signed build and install on a real iPhone (UDID from `xcrun devicectl list devices`). Needs
   `DEVELOPMENT_TEAM = <team id>` in `Local.xcconfig` (git-ignored; `scripts/env.sh` creates a stub).
@@ -113,6 +130,12 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
   support userInterfaceStyle"); the TV light palette has only been checked on the iPhone. There
   is no CLI for the Siri Remote either: `osascript` key codes to the Simulator app do it
   (36 = select, 53 = Menu, 125 = down) after `tell application "Simulator" to activate`.
+- The Mac app is driven with System Events: its SwiftUI buttons have no names there, so click
+  by index (`button 3 of group 1 of window 1` is Begin on the home screen, `button n of toolbar 1`
+  is Copy week in History) and screenshot with `screencapture -x -R x,y,w,h` from the window
+  frame (`get {position, size} of window 1`). Dark mode: `tell appearance preferences to set
+  dark mode to true` in System Events. The store is
+  `~/Library/Containers/com.krisnorthfield.NanoBuddha/Data/Documents/store.json`.
 - Running the watch app alone needs no paired simulators. Testing sync does: `xcrun simctl pair
   <watch udid> <iphone udid>` (`simctl list pairs`). The simulator has no haptics.
 - `WKExtendedRuntimeSession.notifyUser(hapticType:)` works only for `alarm` sessions started

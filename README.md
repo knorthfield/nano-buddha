@@ -1,6 +1,6 @@
 # Nano Buddha
 
-An iPhone, iPad, Apple Watch and Apple TV meditation timer that quietly lengthens your sits.
+An iPhone, iPad, Apple Watch, Apple TV and Mac meditation timer that quietly lengthens your sits.
 
 You choose a nominal duration, say 10 minutes. The app never times exactly that. It adds a
 random offset of up to one minute either way, and a hidden base that grows by 15 seconds
@@ -10,7 +10,7 @@ Each sit is saved locally and written to Apple Health as Mindful Minutes. A sit 
 started from a widget, Control Centre, Siri ("Begin a sit in Nano Buddha") or the Shortcuts app.
 The watch has the same widget as a complication and in the Smart Stack.
 
-SwiftUI, iOS 26+ (watchOS 26 and tvOS 26 for the watch and TV apps), no third-party packages.
+SwiftUI, iOS 26+ (watchOS 26, tvOS 26 and macOS 26 for the watch, TV and Mac apps), no third-party packages.
 
 ## Requirements
 
@@ -28,6 +28,7 @@ scripts/run.sh     # build, then install and launch on the simulator
 scripts/test.sh    # unit tests and a UI test of a full sit
 scripts/watch.sh   # build, then install and launch the watch app on the watch simulator
 scripts/tv.sh      # build, then install and launch the Apple TV app on the Apple TV simulator
+scripts/mac.sh     # signed build of the Mac app, then open it (needs DEVELOPMENT_TEAM, see below)
 ```
 
 Set `SIM_NAME` to use a different simulator, for example `SIM_NAME="iPhone 17 Pro" scripts/run.sh` or `SIM_NAME="iPad Air 11-inch (M4)" scripts/run.sh`.
@@ -45,9 +46,9 @@ Set `SIM_NAME` to use a different simulator, for example `SIM_NAME="iPhone 17 Pr
 - `NanoBuddha/Model` — `DurationPlanner` (hidden duration), `Store` (JSON persistence),
   `HealthWriter`, `Bell` (bowl sound, haptic, and the local notification used when locked)
 - `NanoBuddha/Views` — Home, Sit, Done, History
-- `NanoBuddhaWidgets`, `NanoBuddhaWatch`, `NanoBuddhaWatchWidgets`, `NanoBuddhaTV` — the widget
-  extension, the watch app, its complication extension and the Apple TV app, each compiling the
-  shared model files it can use
+- `NanoBuddhaWidgets`, `NanoBuddhaWatch`, `NanoBuddhaWatchWidgets`, `NanoBuddhaTV`, `NanoBuddhaMac`
+  — the widget extension, the watch app, its complication extension, the Apple TV app and the
+  Mac app, each compiling the shared model files it can use
 - `NanoBuddhaTests`, `NanoBuddhaUITests`
 
 ## Credits
