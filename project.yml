@@ -104,6 +104,9 @@ targets:
       - NanoBuddha/Model/BeginSitIntent.swift
       - NanoBuddha/Model/AppShortcuts.swift
       - NanoBuddha/Views/PrimaryButton.swift
+      - NanoBuddha/Views/RootView.swift
+      - NanoBuddha/Views/NudgeRow.swift
+      - NanoBuddha/Views/DoneView.swift
       - NanoBuddha/Resources/bowl.wav
       - NanoBuddha/Resources/Assets.xcassets
       - NanoBuddha/AppIcon.icon
@@ -159,6 +162,9 @@ targets:
       - NanoBuddha/Views/PrimaryButton.swift
       - NanoBuddha/Views/Starfield.swift
       - NanoBuddha/Views/HistoryView.swift
+      - NanoBuddha/Views/RootView.swift
+      - NanoBuddha/Views/NudgeRow.swift
+      - NanoBuddha/Views/DoneView.swift
       - NanoBuddha/Resources/bowl.wav
       - NanoBuddha/Resources/Assets.xcassets
       - NanoBuddhaTV/Assets.xcassets
@@ -194,6 +200,8 @@ targets:
       - NanoBuddha/Views/Starfield.swift
       - NanoBuddha/Views/HistoryView.swift
       - NanoBuddha/Views/DoneView.swift
+      - NanoBuddha/Views/RootView.swift
+      - NanoBuddha/Views/NudgeRow.swift
       - NanoBuddha/Resources/bowl.wav
       - NanoBuddha/Resources/Assets.xcassets
       - NanoBuddha/AppIcon.icon

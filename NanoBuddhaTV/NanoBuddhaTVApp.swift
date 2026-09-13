@@ -6,7 +6,7 @@ struct NanoBuddhaTVApp: App {
 
     var body: some Scene {
         WindowGroup {
-            TVRootView()
+            RootView()
                 .environment(store)
                 .onAppear {
                     store.didSave = { CloudSync.shared.push() }

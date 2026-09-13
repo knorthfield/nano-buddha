@@ -22,18 +22,7 @@ struct HomeView: View {
                     .pickerStyle(.wheel)
                     .frame(height: 160)
                 } else {
-                    HStack(spacing: 24) {
-                        Button { store.nudge(by: -60) } label: { Image(systemName: "minus").frame(width: 24, height: 24) }
-                            .accessibilityLabel("One minute less")
-                            .disabled(store.intendedSeconds <= 60)
-                        Text(store.intendedTimeText)
-                            .font(.title)
-                            .monospacedDigit()
-                        Button { store.nudge(by: 60) } label: { Image(systemName: "plus").frame(width: 24, height: 24) }
-                            .accessibilityLabel("One minute more")
-                    }
-                    .buttonStyle(.glass)
-                    .buttonBorderShape(.circle)
+                    NudgeRow()
                 }
                 PrimaryButton(title: "Begin", action: onStart)
                 Spacer()

@@ -1,7 +1,7 @@
 import SwiftUI
 import WatchKit
 
-struct WatchSitView: View {
+struct SitView: View {
     let plannedSeconds: Int
     let settlingSeconds: Int
     let onFinish: (Session) -> Void

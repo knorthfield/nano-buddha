@@ -6,7 +6,7 @@ struct NanoBuddhaMacApp: App {
 
     var body: some Scene {
         WindowGroup(id: "main") {
-            MacRootView()
+            RootView()
                 .environment(store)
                 .onAppear {
                     store.didSave = { CloudSync.shared.push() }

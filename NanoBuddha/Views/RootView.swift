@@ -1,5 +1,6 @@
 import SwiftUI
 
+/// Home, sit, done. Every app compiles this with its own HomeView and SitView under those names.
 struct RootView: View {
     enum Phase {
         case home
@@ -8,8 +9,10 @@ struct RootView: View {
     }
 
     @Environment(Store.self) private var store
-    @Environment(\.scenePhase) private var scenePhase
     @State private var phase = Phase.home
+    #if os(iOS) || os(watchOS)
+    @Environment(\.scenePhase) private var scenePhase
+    #endif
 
     var body: some View {
         Group {
@@ -25,13 +28,16 @@ struct RootView: View {
                 DoneView(session: session) { phase = .home }
             }
         }
+        #if os(iOS) || os(watchOS)
+        // A Siri, Shortcuts or Control Centre "Begin sit" leaves a request; a cold launch sees
+        // it on activation, a warm one through the notification.
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active { beginSitIfRequested() }
         }
-        // The Control Centre intent runs in this process when the app is already active.
         .onReceive(NotificationCenter.default.publisher(for: SitRequest.didPost)) { _ in
             beginSitIfRequested()
         }
+        #endif
     }
 
     private func beginSit() {
@@ -40,8 +46,11 @@ struct RootView: View {
         phase = .sitting(plannedSeconds: plan.plannedSeconds, settlingSeconds: plan.settlingSeconds)
     }
 
+    #if os(iOS) || os(watchOS)
     private func beginSitIfRequested() {
-        guard case .home = phase, SitRequest.take() else { return }
+        if case .sitting = phase { return }  // A running sit is not interrupted.
+        guard SitRequest.take() else { return }
         beginSit()
     }
+    #endif
 }

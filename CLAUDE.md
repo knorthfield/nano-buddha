@@ -29,8 +29,8 @@ app's (`...watchkitapp.NanoBuddhaWatchWidgets`). The intent writes a timestamp f
 `SitRequest.didPost` and starts a sit. (A flag in app-group `UserDefaults` lost writes on the
 simulator, hence the file.) `Model/AppShortcuts.swift` registers the same intent as an App
 Shortcut, so Siri ("Begin a sit in Nano Buddha"), Spotlight, the Shortcuts app and the Action
-button can begin a sit on the iPhone and the watch (`WatchRootView` consumes the request the
-same way). The provider is compiled into the two apps only, not the widget extension or the TV.
+button can begin a sit on the iPhone and the watch (the shared `RootView` consumes the request
+on both; the Done screen begins a new sit, a running sit ignores the request). The provider is compiled into the two apps only, not the widget extension or the TV.
 The store calls `WidgetCenter.reloadAllTimelines()` on every save.
 A running sit has a Live Activity (`Model/SitActivity.swift`, `NanoBuddhaWidgets/SitActivityWidget.swift`,
 `NSSupportsLiveActivities` in `project.yml`): lock screen banner and Dynamic Island show "Sitting"
@@ -41,11 +41,14 @@ notifications, and the sit is lost (the phase was never persisted). `SitActivity
 into the iPhone app and the widget extension only.
 `NanoBuddhaWatch` is the Apple Watch app (single-target, embedded under `Watch/` in the iOS
 bundle, bundle id `com.krisnorthfield.NanoBuddha.watchkitapp`). It runs the same sit through the
-shared `Sit` model (`Model/Sit.swift`: settling silence, opening bell, target bell, End). Bells
+shared `Sit` model (`Model/Sit.swift`: settling silence, opening bell, target bell, End) and the
+shared `RootView`, `DoneView` and `NudgeRow`; every app has its own `HomeView` and `SitView` under
+those names, which is what lets `RootView` be shared (sizes for the Done screen and the nudge row
+are `#if` constants in the shared files). Bells
 on the watch are a wrist tap (`WKInterfaceDevice.play(.notification)` in `Bell.swift`); the bowl
 sound plays only when the Sound toggle on the watch home screen is on (`UserDefaults`
 `bellSound`, off by default, for retreats). A mindfulness `WKExtendedRuntimeSession`
-(`WatchSitView.swift`, `WKBackgroundModes: [mindfulness]`) keeps the app running with the wrist
+(`NanoBuddhaWatch/SitView.swift`, `WKBackgroundModes: [mindfulness]`) keeps the app running with the wrist
 down for up to an hour; after that, or after a crown press, the scheduled notifications ring
 the bells as on a locked phone. The watch has its own `store.json` in its app group container
 (same group id as the iPhone, but a separate device; `Store.defaultFileURL` moved the old
@@ -64,8 +67,8 @@ builds; the simulator only syncs when an iCloud account is signed in via Setting
 that), and without one the key-value calls are silent no-ops.
 `NanoBuddhaTV` is the Apple TV app (`NanoBuddhaTV/`, tvOS 26, same bundle id as the iPhone app
 for universal purchase, not embedded in it). It compiles the shared `Sit`, `Store`, `Bell`,
-`CloudSync`, `PrimaryButton`, `Starfield` and `HistoryView` (no Copy week, `#if !os(tvOS)`), and
-nothing else: tvOS has no HealthKit, WatchConnectivity,
+`CloudSync`, `PrimaryButton`, `Starfield`, `RootView`, `NudgeRow`, `DoneView` and `HistoryView` (no
+Health line and no Copy week, `#if !os(tvOS)`), and nothing else: tvOS has no HealthKit, WatchConnectivity,
 WidgetKit, pasteboard or alert notifications, so the TV store lives in Documents and syncs only
 over iCloud (`CloudSync`, no WatchConnectivity), there is no Health write, no Copy week, and the
 bowl is audio only
@@ -75,8 +78,8 @@ sit screen keeps the TV awake (`isIdleTimerDisabled`) and the remote's Menu butt
 (`.onExitCommand`) so a sit cannot run on behind the tvOS home screen.
 `NanoBuddhaMac` is the native Mac app (`NanoBuddhaMac/`, macOS 26, same bundle id as the iPhone
 app, not Catalyst). Like the TV it compiles only the shared `Sit`, `Store`, `Bell`, `CloudSync`,
-`WeekLog`, `PrimaryButton`, `Starfield`, `HistoryView` (Copy week uses `NSPasteboard` under
-`#if os(macOS)`) and `DoneView` (no Health line there): no HealthKit, WatchConnectivity, App Shortcut or Live
+`WeekLog`, `PrimaryButton`, `Starfield`, `RootView`, `NudgeRow`, `HistoryView` (Copy week uses
+`NSPasteboard` under `#if os(macOS)`) and `DoneView` (no Health line there): no HealthKit, WatchConnectivity, App Shortcut or Live
 Activity on the Mac. `NanoBuddhaMacWidgets` is the Mac widget extension: the same `SitWidget.swift`
 as a desktop and Notification Centre widget (families small and medium, `#if os(macOS)`; the
 accessory families do not exist on macOS). The Mac store lives in the app group container so the

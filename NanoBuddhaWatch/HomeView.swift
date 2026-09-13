@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct WatchHomeView: View {
+struct HomeView: View {
     @Environment(Store.self) private var store
     @AppStorage(Bell.soundKey) private var soundOn = false
     let onStart: () -> Void
@@ -20,18 +20,7 @@ struct WatchHomeView: View {
                     }
                     .frame(height: 60)
                 } else {
-                    HStack(spacing: 12) {
-                        Button { store.nudge(by: -60) } label: { Image(systemName: "minus") }
-                            .accessibilityLabel("One minute less")
-                            .disabled(store.intendedSeconds <= 60)
-                        Text(store.intendedTimeText)
-                            .font(.title3)
-                            .monospacedDigit()
-                        Button { store.nudge(by: 60) } label: { Image(systemName: "plus") }
-                            .accessibilityLabel("One minute more")
-                    }
-                    .buttonStyle(.glass)
-                    .buttonBorderShape(.circle)
+                    NudgeRow()
                 }
                 PrimaryButton(title: "Begin", action: onStart)
                 Toggle("Sound", isOn: $soundOn)
