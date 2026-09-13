@@ -42,6 +42,11 @@ struct SitWidgetView: View {
             switch family {
             case .accessoryInline:
                 Text("\(entry.intendedMinutes) min · \(entry.weekSits) sits this week")
+            #if os(watchOS)
+            case .accessoryCorner:
+                Text("\(entry.intendedMinutes)").font(.title2.bold()).monospacedDigit()
+                    .widgetLabel("\(entry.weekSits) sits this week")
+            #endif
             case .accessoryCircular:
                 VStack(spacing: 0) {
                     Text("\(entry.intendedMinutes)").font(.title2.bold()).monospacedDigit()
@@ -68,7 +73,11 @@ struct SitWidgetView: View {
             if family == .accessoryCircular {
                 AccessoryWidgetBackground()
             } else {
+                #if os(watchOS)
+                Color.clear
+                #else
                 Color(.systemBackground)
+                #endif
             }
         }
     }
@@ -81,6 +90,10 @@ struct SitWidget: Widget {
         }
         .configurationDisplayName("Nano Buddha")
         .description("Your next sit and the last seven days.")
+        #if os(watchOS)
+        .supportedFamilies([.accessoryCorner, .accessoryCircular, .accessoryRectangular, .accessoryInline])
+        #else
         .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryRectangular, .accessoryInline])
+        #endif
     }
 }

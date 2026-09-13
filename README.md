@@ -8,6 +8,7 @@ after every completed sit. The sit screen shows no time at all, so there is noth
 watch. A singing bowl rings when the time is up, and the sit carries on until you end it.
 Each sit is saved locally and written to Apple Health as Mindful Minutes. A sit can also be
 started from a widget, Control Centre, Siri ("Begin a sit in Nano Buddha") or the Shortcuts app.
+The watch has the same widget as a complication and in the Smart Stack.
 
 SwiftUI, iOS 26+ (watchOS 26 and tvOS 26 for the watch and TV apps), no third-party packages.
 
@@ -44,8 +45,9 @@ Set `SIM_NAME` to use a different simulator, for example `SIM_NAME="iPhone 17 Pr
 - `NanoBuddha/Model` — `DurationPlanner` (hidden duration), `Store` (JSON persistence),
   `HealthWriter`, `Bell` (bowl sound, haptic, and the local notification used when locked)
 - `NanoBuddha/Views` — Home, Sit, Done, History
-- `NanoBuddhaWidgets`, `NanoBuddhaWatch`, `NanoBuddhaTV` — the widget extension, the watch app
-  and the Apple TV app, each compiling the shared model files it can use
+- `NanoBuddhaWidgets`, `NanoBuddhaWatch`, `NanoBuddhaWatchWidgets`, `NanoBuddhaTV` — the widget
+  extension, the watch app, its complication extension and the Apple TV app, each compiling the
+  shared model files it can use
 - `NanoBuddhaTests`, `NanoBuddhaUITests`
 
 ## Credits

@@ -20,7 +20,11 @@ Apple Health as Mindful Minutes (`HealthWriter.swift`). History has a Copy week 
 markdown log of the last 7 days on the pasteboard (`WeekLog.swift`).
 `NanoBuddhaWidgets` is a WidgetKit extension: one widget (small home screen, lock screen
 circular/rectangular/inline) with the intended minutes and the last 7 days, and a Control Centre
-button "Begin sit" (`BeginSitIntent`, `openAppWhenRun`). The intent writes a timestamp file
+button "Begin sit" (`BeginSitIntent`, `openAppWhenRun`). `NanoBuddhaWatchWidgets` is the watchOS
+widget extension embedded in the watch app: it compiles the same `SitWidget.swift` (plus `Store`,
+`Session`, `DurationPlanner`) as complications and Smart Stack widget, families corner (watch
+only, `#if os(watchOS)`), circular, rectangular and inline; the bundle id is prefixed by the watch
+app's (`...watchkitapp.NanoBuddhaWatchWidgets`). The intent writes a timestamp file
 `sitRequest` in the app group; `RootView` consumes it on scene activation or on
 `SitRequest.didPost` and starts a sit. (A flag in app-group `UserDefaults` lost writes on the
 simulator, hence the file.) `Model/AppShortcuts.swift` registers the same intent as an App
@@ -43,11 +47,13 @@ sound plays only when the Sound toggle on the watch home screen is on (`UserDefa
 `bellSound`, off by default, for retreats). A mindfulness `WKExtendedRuntimeSession`
 (`WatchSitView.swift`, `WKBackgroundModes: [mindfulness]`) keeps the app running with the wrist
 down for up to an hour; after that, or after a crown press, the scheduled notifications ring
-the bells as on a locked phone. The watch has its own `store.json` in Documents (no app group)
-and saves to Health itself. `Model/Sync.swift` keeps the two stores the same over
-WatchConnectivity: every save sends the snapshot as the application context, the other side
-merges it (`Store.merge`: union of sits by id, the more recently changed intended duration
-wins). The widget target does not compile `Sync.swift`.
+the bells as on a locked phone. The watch has its own `store.json` in its app group container
+(same group id as the iPhone, but a separate device; `Store.defaultFileURL` moved the old
+Documents copy there) so the watch complication can read it, and it saves to Health itself.
+`Model/Sync.swift` keeps the two stores the same over WatchConnectivity: every save sends the
+snapshot as the application context, the other side merges it (`Store.merge`: union of sits by
+id, the more recently changed intended duration wins). The widget targets do not compile
+`Sync.swift`.
 `NanoBuddhaTV` is the Apple TV app (`NanoBuddhaTV/`, tvOS 26, same bundle id as the iPhone app
 for universal purchase, not embedded in it). It compiles the shared `Sit`, `Store`, `Bell`,
 `PrimaryButton` and `Starfield`, and nothing else: tvOS has no HealthKit, WatchConnectivity,
@@ -114,6 +120,16 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
   with `simctl io`. To exercise the Control Centre path without the control, write the current
   Unix time to `<group container>/sitRequest` (`xcrun simctl get_app_container <udid>
   com.krisnorthfield.NanoBuddha groups`) and launch the app: it opens on the sit screen.
+- Watch complications: after a fresh install the face editor and the Smart Stack picker do not
+  list the app (chronod has the descriptor, the pickers cache the app list). Reboot the watch
+  simulator (`simctl shutdown` + `boot`) and it appears. The scroll wheel does nothing on the
+  watch simulator and osascript cannot hold or drag the mouse, so the face editor was driven
+  with a small CGEvent tool (`swiftc` a script that posts mouseDown/mouseUp/drag with
+  `CGEvent(mouseEventSource:mouseType:mouseCursorPosition:mouseButton:)`; needs Accessibility
+  for the terminal). Map watch pixels to Mac points from a `screencapture -R` of the window,
+  not from the window frame: the screen sits low inside the bezel. Long press on the face,
+  Edit, swipe to Complications, tap a slot, scroll to N; Smart Stack: swipe up on the face,
+  Edit, +, pick the app.
 - `osascript` keystrokes to Simulator.app (cmd+shift+H, cmd+L) did nothing here, so the Live
   Activity is checked from the UI test (`testEndFromTheLiveActivity`): `XCUIDevice.shared.press(.home)`,
   a 1 s press on the island at normalized (0.5, 0.03) expands it, and `springboard.buttons["End"]`

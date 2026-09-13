@@ -96,6 +96,9 @@ targets:
       - NanoBuddha/Resources/bowl.wav
       - NanoBuddha/Resources/Assets.xcassets
       - NanoBuddha/AppIcon.icon
+    dependencies:
+      - target: NanoBuddhaWatchWidgets
+        embed: true
     info:
       path: NanoBuddhaWatch/Info.plist
       properties:
@@ -113,6 +116,7 @@ targets:
       properties:
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.access: []
+        com.apple.security.application-groups: [group.com.krisnorthfield.NanoBuddha]
     settings:
       base:
         # Same rule as the widget: the watch app's bundle id must be prefixed by the app's.
@@ -121,6 +125,37 @@ targets:
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         GENERATE_INFOPLIST_FILE: NO
+  NanoBuddhaWatchWidgets:
+    type: app-extension
+    platform: watchOS
+    sources:
+      - NanoBuddhaWatchWidgets
+      - NanoBuddhaWidgets/SitWidget.swift
+      - NanoBuddha/Model/Store.swift
+      - NanoBuddha/Model/Session.swift
+      - NanoBuddha/Model/DurationPlanner.swift
+      - NanoBuddha/Resources/Assets.xcassets
+    info:
+      path: NanoBuddhaWatchWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: Nano Buddha
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: NanoBuddhaWatchWidgets/NanoBuddhaWatchWidgets.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.krisnorthfield.NanoBuddha]
+    settings:
+      base:
+        # Prefixed by the watch app's bundle id, the host of this extension.
+        PRODUCT_BUNDLE_IDENTIFIER: com.krisnorthfield.NanoBuddha.watchkitapp.NanoBuddhaWatchWidgets
+        SWIFT_VERSION: "5.9"
+        CODE_SIGN_STYLE: Automatic
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        GENERATE_INFOPLIST_FILE: NO
+        SKIP_INSTALL: YES
   NanoBuddhaTV:
     type: application
     platform: tvOS
@@ -181,6 +216,7 @@ schemes:
         NanoBuddha: all
         NanoBuddhaWidgets: all
         NanoBuddhaWatch: all
+        NanoBuddhaWatchWidgets: all
         NanoBuddhaTests: [test]
         NanoBuddhaUITests: [test]
     run:
@@ -194,6 +230,7 @@ schemes:
     build:
       targets:
         NanoBuddhaWatch: all
+        NanoBuddhaWatchWidgets: all
     run:
       config: Debug
   NanoBuddhaTV:
