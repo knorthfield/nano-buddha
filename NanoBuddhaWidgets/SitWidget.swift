@@ -36,31 +36,37 @@ struct SitProvider: TimelineProvider {
 struct SitWidgetView: View {
     @Environment(\.widgetFamily) private var family
     let entry: SitEntry
+    private static let symbol = "figure.mind.and.body"
 
     var body: some View {
         Group {
             switch family {
             case .accessoryInline:
-                Text("\(entry.intendedMinutes) min · \(entry.weekSits) sits this week")
+                Label {
+                    Text("\(entry.intendedMinutes) min · \(entry.weekSits) sits this week")
+                } icon: {
+                    Image(systemName: Self.symbol)
+                }
             #if os(watchOS)
             case .accessoryCorner:
-                Text("\(entry.intendedMinutes)").font(.title2.bold()).monospacedDigit()
-                    .widgetLabel("\(entry.weekSits) sits this week")
+                Image(systemName: Self.symbol).font(.title2).widgetAccentable()
+                    .widgetLabel("\(entry.intendedMinutes) min · \(entry.weekSits) sits")
             #endif
             case .accessoryCircular:
                 VStack(spacing: 0) {
+                    Image(systemName: Self.symbol).font(.caption)
                     Text("\(entry.intendedMinutes)").font(.title2.bold()).monospacedDigit()
-                    Text("min").font(.caption2)
                 }
             case .accessoryRectangular:
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Nano Buddha").font(.headline)
+                    Label("Nano Buddha", systemImage: Self.symbol).font(.headline)
                     Text("\(entry.intendedMinutes) min next")
                     Text("\(entry.weekSits) sits · \(entry.weekMinutes) min, 7 days").font(.caption)
                 }
             default:
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("\(entry.intendedMinutes) min").font(.largeTitle.bold()).monospacedDigit()
+                    Label("\(entry.intendedMinutes) min", systemImage: Self.symbol)
+                        .font(.largeTitle.bold()).monospacedDigit()
                     Spacer()
                     Text("\(entry.weekSits) sits · \(entry.weekMinutes) min")
                     Text("last 7 days").foregroundStyle(.secondary)
