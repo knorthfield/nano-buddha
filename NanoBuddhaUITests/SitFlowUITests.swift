@@ -3,23 +3,9 @@ import XCTest
 
 final class SitFlowUITests: XCTestCase {
     func testQuickSitReachesCompletionAndHistory() {
-        let app = XCUIApplication()
-        app.launchArguments = ["-quickSit"]
-        app.launch()
-
-        app.buttons["Begin"].tap()
-
-        // Notification permission alert lives in SpringBoard.
-        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
-        let allowNotifications = springboard.buttons["Allow"]
-        if allowNotifications.waitForExistence(timeout: 3) { allowNotifications.tap() }
-
-        // The -quickSit bell rings after 5 s; the sit carries on until End is tapped.
+        let (app, _) = beginQuickSit()
         // Ending after the bell counts as complete. Done screen then asks for Health access.
-        let end = app.buttons["End"]
-        XCTAssertTrue(end.waitForExistence(timeout: 5))
-        sleep(7)
-        end.tap()
+        app.buttons["End"].tap()
         dismissHealthPrompt(app)
         add(XCTAttachment(screenshot: app.screenshot()))
 
@@ -43,16 +29,7 @@ final class SitFlowUITests: XCTestCase {
     }
 
     func testEndFromTheLiveActivity() {
-        let app = XCUIApplication()
-        app.launchArguments = ["-quickSit"]
-        app.launch()
-        app.buttons["Begin"].tap()
-
-        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
-        let allowNotifications = springboard.buttons["Allow"]
-        if allowNotifications.waitForExistence(timeout: 3) { allowNotifications.tap() }
-        XCTAssertTrue(app.buttons["End"].waitForExistence(timeout: 5))
-        sleep(7)
+        let (app, springboard) = beginQuickSit()
 
         // Leave the app; the sit carries on and its Live Activity sits in the Dynamic Island.
         XCUIDevice.shared.press(.home)
@@ -64,12 +41,30 @@ final class SitFlowUITests: XCTestCase {
         XCTAssertTrue(end.waitForExistence(timeout: 5))
         add(XCTAttachment(screenshot: springboard.screenshot()))
         end.tap()
+        XCTAssertTrue(end.waitForNonExistence(timeout: 5), "the Live Activity has ended")
 
         // The intent ran in the app: back in the foreground it is on the Done screen.
         app.activate()
         dismissHealthPrompt(app)
         XCTAssertTrue(app.staticTexts["Session complete"].waitForExistence(timeout: 5))
-        XCTAssertFalse(springboard.buttons["End"].exists)
+    }
+
+    /// Launches a 5 s sit, answers the notification alert, and waits until the bell has rung.
+    private func beginQuickSit() -> (app: XCUIApplication, springboard: XCUIApplication) {
+        let app = XCUIApplication()
+        app.launchArguments = ["-quickSit"]
+        app.launch()
+        app.buttons["Begin"].tap()
+
+        // Notification permission alert lives in SpringBoard.
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let allowNotifications = springboard.buttons["Allow"]
+        if allowNotifications.waitForExistence(timeout: 3) { allowNotifications.tap() }
+
+        // The -quickSit bell rings after 5 s; the sit carries on until End is tapped.
+        XCTAssertTrue(app.buttons["End"].waitForExistence(timeout: 5))
+        sleep(7)
+        return (app, springboard)
     }
 
     private func dismissHealthPrompt(_ app: XCUIApplication) {

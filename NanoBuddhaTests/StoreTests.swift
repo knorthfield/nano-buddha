@@ -2,16 +2,19 @@ import XCTest
 @testable import NanoBuddha
 
 final class StoreTests: XCTestCase {
-    private var fileURL: URL!
-
-    override func setUp() {
-        fileURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("store-\(UUID().uuidString).json")
-    }
+    private var fileURLs: [URL] = []
 
     override func tearDown() {
-        try? FileManager.default.removeItem(at: fileURL)
+        fileURLs.forEach { try? FileManager.default.removeItem(at: $0) }
     }
+
+    private func temporaryURL() -> URL {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("store-\(UUID().uuidString).json")
+        fileURLs.append(url)
+        return url
+    }
+
+    private func temporaryStore() -> Store { Store(fileURL: temporaryURL()) }
 
     private func session(secondsAgo: Int, completed: Bool = true) -> Session {
         let end = Date.now.addingTimeInterval(-Double(secondsAgo))
@@ -19,21 +22,66 @@ final class StoreTests: XCTestCase {
     }
 
     func testRecordRoundTripsThroughTheFile() {
-        let store = Store(fileURL: fileURL)
+        let url = temporaryURL()
+        let store = Store(fileURL: url)
         store.intendedSeconds = 900
+        var saves = 0
+        store.didSave = { saves += 1 }
         store.record(session(secondsAgo: 0))
+        XCTAssertEqual(saves, 1)
 
-        let reloaded = Store(fileURL: fileURL)
+        let reloaded = Store(fileURL: url)
         XCTAssertEqual(reloaded.sessions.count, 1)
         XCTAssertEqual(reloaded.intendedSeconds, 900 + DurationPlanner.growthPerSessionSeconds)
     }
 
+    func testStoreGrowsOnlyOnCompletedSessions() {
+        let store = temporaryStore()
+        store.record(session(secondsAgo: 0))
+        store.record(session(secondsAgo: 0, completed: false))
+        XCTAssertEqual(store.intendedSeconds, 600 + DurationPlanner.growthPerSessionSeconds)
+    }
+
     func testLoadingDoesNotWriteTheFile() throws {
-        Store(fileURL: fileURL).record(session(secondsAgo: 0))
-        let before = try FileManager.default.attributesOfItem(atPath: fileURL.path)[.modificationDate] as? Date
-        _ = Store(fileURL: fileURL)
-        let after = try FileManager.default.attributesOfItem(atPath: fileURL.path)[.modificationDate] as? Date
+        let url = temporaryURL()
+        Store(fileURL: url).record(session(secondsAgo: 0))
+        let before = try FileManager.default.attributesOfItem(atPath: url.path)[.modificationDate] as? Date
+        _ = Store(fileURL: url)
+        let after = try FileManager.default.attributesOfItem(atPath: url.path)[.modificationDate] as? Date
         XCTAssertEqual(before, after)
+    }
+
+    func testLoadsLegacySnapshot() throws {
+        let url = temporaryURL()
+        let legacy = #"{"sessions":[],"lastNominalMinutes":10,"growthSeconds":45}"#
+        try legacy.write(to: url, atomically: true, encoding: .utf8)
+        XCTAssertEqual(Store(fileURL: url).intendedSeconds, 645)
+    }
+
+    func testNudgeFloorsAtOneMinute() {
+        let store = temporaryStore()
+        store.nudge(by: -600)
+        XCTAssertEqual(store.intendedSeconds, 60)
+        store.nudge(by: 60)
+        XCTAssertEqual(store.intendedSeconds, 120)
+    }
+
+    func testIntendedTimeTextShowsOddSeconds() {
+        let store = temporaryStore()
+        store.intendedSeconds = 600
+        XCTAssertEqual(store.intendedTimeText, "10 min")
+        store.intendedSeconds = 615
+        XCTAssertEqual(store.intendedTimeText, "10 min 15 s")
+    }
+
+    func testMinutesRoundToNearestLikeHealth() {
+        let now = Date()
+        let store = temporaryStore()
+        store.record(Session(start: now, end: now + 280, plannedSeconds: 300, completed: true))
+        store.record(Session(start: now, end: now + 290, plannedSeconds: 300, completed: true))
+        XCTAssertEqual(store.sessions[0].actualMinutes, 5)
+        XCTAssertEqual(Session(start: now, end: now + 269, plannedSeconds: 300, completed: true).actualMinutes, 4)
+        XCTAssertEqual(store.totalMinutes, 10)
     }
 
     func testInLastDaysKeepsTheWindowOldestFirst() {
@@ -41,17 +89,6 @@ final class StoreTests: XCTestCase {
         let sessions = [session(secondsAgo: day), session(secondsAgo: 6 * day), session(secondsAgo: 8 * day)]
         let week = sessions.inLast(days: 7)
         XCTAssertEqual(week.map(\.start), [sessions[1].start, sessions[0].start])
-    }
-}
-
-final class StoreMergeTests: XCTestCase {
-    private func session(secondsAgo: Int) -> Session {
-        let end = Date.now.addingTimeInterval(-Double(secondsAgo))
-        return Session(start: end - 600, end: end, plannedSeconds: 600, completed: true)
-    }
-
-    private func temporaryStore() -> Store {
-        Store(fileURL: FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID()).json"))
     }
 
     func testMergeAddsUnseenSitsOldestFirst() {

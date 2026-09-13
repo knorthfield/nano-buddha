@@ -71,10 +71,8 @@ final class Store {
 
     func record(_ session: Session) {
         sessions.append(session)
-        if session.completed {
-            intendedSeconds += DurationPlanner.growthPerSessionSeconds
-        }
-        save()
+        guard session.completed else { return save() }
+        intendedSeconds += DurationPlanner.growthPerSessionSeconds  // Its didSet saves.
     }
 
     func nudge(by seconds: Int) {

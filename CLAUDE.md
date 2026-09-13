@@ -106,7 +106,8 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
 - `project.yml` is the source of truth; `NanoBuddha.xcodeproj` is generated and git-ignored.
   The three widget extensions come from its `WidgetExtension` target template.
 - `scripts/build.sh` — xcodegen + simulator build.
-- `scripts/run.sh` — build, then install and launch on the simulator (`SIM_NAME` env var overrides the device).
+- `scripts/run.sh` — build, then install and launch on the simulator (`SIM_NAME` env var overrides
+  the device). Extra arguments go to the app (`-quickSit`).
 - `scripts/test.sh` — unit tests and UI test.
 - `scripts/watch.sh` — build, then install and launch the watch app on the watch simulator
   (`WATCH_SIM_NAME` env var overrides the device). Extra arguments go to the app (`-quickSit`).
@@ -120,6 +121,7 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
 - `scripts/device.sh <udid>` — signed build and install on a real iPhone (UDID from `xcrun devicectl list devices`). Needs
   `DEVELOPMENT_TEAM = <team id>` in `Local.xcconfig` (git-ignored; `scripts/env.sh` creates a stub).
 - The scripts set `DEVELOPER_DIR` to /Applications/Xcode.app, so `xcode-select` does not need changing.
+  `scripts/env.sh` holds the names, `build_scheme` (xcodegen + xcodebuild) and `install_and_launch`.
 - Screenshots: `xcrun simctl io booted screenshot shot.png`.
 
 ## Toolchain gotchas (learned the hard way)

@@ -6,6 +6,10 @@ final class DurationPlannerTests: XCTestCase {
         XCTAssertEqual(DurationPlanner.realSeconds(intendedSeconds: 630, jitter: -20), 610)
     }
 
+    func testRealSecondsFloorsAtOneMinute() {
+        XCTAssertEqual(DurationPlanner.realSeconds(intendedSeconds: 60, jitter: -60), 60)
+    }
+
     func testRandomJitterStaysWithinOneMinute() {
         for _ in 0..<200 {
             let seconds = DurationPlanner.realSeconds(intendedSeconds: 600)
@@ -23,46 +27,5 @@ final class DurationPlannerTests: XCTestCase {
         let plan = DurationPlanner.plan(intendedSeconds: 600, arguments: [])
         XCTAssertEqual(plan.settlingSeconds, DurationPlanner.settlingSeconds)
         XCTAssert((540...660).contains(plan.plannedSeconds), "\(plan.plannedSeconds) out of range")
-    }
-
-    func testStoreGrowsOnlyOnCompletedSessions() throws {
-        let url = temporaryURL()
-        let store = Store(fileURL: url)
-        let now = Date()
-        store.record(Session(start: now, end: now + 600, plannedSeconds: 600, completed: true))
-        store.record(Session(start: now, end: now + 60, plannedSeconds: 600, completed: false))
-        XCTAssertEqual(store.intendedSeconds, 600 + DurationPlanner.growthPerSessionSeconds)
-        let reloaded = Store(fileURL: url)
-        XCTAssertEqual(reloaded.sessions.count, 2)
-        XCTAssertEqual(reloaded.intendedSeconds, 600 + DurationPlanner.growthPerSessionSeconds)
-    }
-
-    func testNudgeFloorsAtOneMinute() {
-        let store = Store(fileURL: temporaryURL())
-        store.nudge(by: -600)
-        XCTAssertEqual(store.intendedSeconds, 60)
-        store.nudge(by: 60)
-        XCTAssertEqual(store.intendedSeconds, 120)
-    }
-
-    func testLoadsLegacySnapshot() throws {
-        let url = temporaryURL()
-        let legacy = #"{"sessions":[],"lastNominalMinutes":10,"growthSeconds":45}"#
-        try legacy.write(to: url, atomically: true, encoding: .utf8)
-        XCTAssertEqual(Store(fileURL: url).intendedSeconds, 645)
-    }
-
-    func testMinutesRoundToNearestLikeHealth() {
-        let now = Date()
-        let store = Store(fileURL: temporaryURL())
-        store.record(Session(start: now, end: now + 280, plannedSeconds: 300, completed: true))
-        store.record(Session(start: now, end: now + 290, plannedSeconds: 300, completed: true))
-        XCTAssertEqual(store.sessions[0].actualMinutes, 5)
-        XCTAssertEqual(Session(start: now, end: now + 269, plannedSeconds: 300, completed: true).actualMinutes, 4)
-        XCTAssertEqual(store.totalMinutes, 10)
-    }
-
-    private func temporaryURL() -> URL {
-        FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID()).json")
     }
 }
