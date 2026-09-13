@@ -18,7 +18,7 @@ final class StoreTests: XCTestCase {
 
     private func session(secondsAgo: Int, completed: Bool = true) -> Session {
         let end = Date.now.addingTimeInterval(-Double(secondsAgo))
-        return Session(start: end - 600, end: end, plannedSeconds: 600, completed: completed)
+        return Session(start: end - 600, end: end, completed: completed)
     }
 
     func testRecordRoundTripsThroughTheFile() {
@@ -77,10 +77,10 @@ final class StoreTests: XCTestCase {
     func testMinutesRoundToNearestLikeHealth() {
         let now = Date()
         let store = temporaryStore()
-        store.record(Session(start: now, end: now + 280, plannedSeconds: 300, completed: true))
-        store.record(Session(start: now, end: now + 290, plannedSeconds: 300, completed: true))
+        store.record(Session(start: now, end: now + 280, completed: true))
+        store.record(Session(start: now, end: now + 290, completed: true))
         XCTAssertEqual(store.sessions[0].actualMinutes, 5)
-        XCTAssertEqual(Session(start: now, end: now + 269, plannedSeconds: 300, completed: true).actualMinutes, 4)
+        XCTAssertEqual(Session(start: now, end: now + 269, completed: true).actualMinutes, 4)
         XCTAssertEqual(store.totalMinutes, 10)
     }
 
@@ -115,6 +115,17 @@ final class StoreTests: XCTestCase {
         XCTAssertEqual(mine.intendedSeconds, 1200)
         XCTAssertFalse(theirs.merge(mine.snapshot), "the older value does not win")
         XCTAssertEqual(theirs.intendedSeconds, 1200)
+    }
+
+    func testMergeAdoptsANewerTimestampForTheSameValue() {
+        let mine = temporaryStore()
+        let theirs = temporaryStore()
+        mine.intendedSeconds = 900
+        theirs.intendedSeconds = 900
+
+        XCTAssertTrue(mine.merge(theirs.snapshot))
+        XCTAssertEqual(mine.snapshot.intendedUpdatedAt, theirs.snapshot.intendedUpdatedAt)
+        XCTAssertFalse(theirs.merge(mine.snapshot), "the same timestamp is not newer")
     }
 
     func testMergeSavesAndTellsTheListener() {

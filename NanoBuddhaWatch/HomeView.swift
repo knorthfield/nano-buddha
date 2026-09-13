@@ -27,6 +27,5 @@ struct HomeView: View {
                     .padding(.horizontal, 8)
             }
         }
-        .navigationTitle("Nano Buddha")
     }
 }

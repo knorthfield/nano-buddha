@@ -91,10 +91,9 @@ final class Store {
             sessions = (sessions + unseen).sorted { $0.start < $1.start }
             changed = true
         }
-        if let seconds = other.intendedSeconds, seconds != intendedSeconds,
-           let theirs = other.intendedUpdatedAt, theirs > (intendedUpdatedAt ?? .distantPast) {
+        if let theirs = other.intendedUpdatedAt, theirs > (intendedUpdatedAt ?? .distantPast) {
             isRestoring = true
-            intendedSeconds = seconds
+            if let seconds = other.intendedSeconds { intendedSeconds = seconds }
             intendedUpdatedAt = theirs
             isRestoring = false
             changed = true

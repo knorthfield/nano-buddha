@@ -18,7 +18,6 @@ final class SitTests: XCTestCase {
         XCTAssertTrue(session.completed)
         XCTAssertEqual(session.start, begin + 30)
         XCTAssertEqual(session.end, begin + 700)
-        XCTAssertEqual(session.plannedSeconds, 600)
     }
 
     func testEndBeforeTheTargetIsNotCompleted() {

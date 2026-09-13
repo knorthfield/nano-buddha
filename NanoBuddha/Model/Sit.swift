@@ -5,12 +5,10 @@ import Foundation
 final class Sit {
     private(set) var sitStart = Date()
     private(set) var endDate = Date()
-    private var plannedSeconds = 0
     private var openingRung = false
     private var targetRung = false
 
     func start(settlingSeconds: Int, plannedSeconds: Int, now: Date = .now) {
-        self.plannedSeconds = plannedSeconds
         sitStart = now.addingTimeInterval(TimeInterval(settlingSeconds))
         endDate = sitStart.addingTimeInterval(TimeInterval(plannedSeconds))
         Bell.scheduleNotification(for: .opening, at: sitStart)
@@ -34,8 +32,7 @@ final class Sit {
         Bell.cancelNotifications()
         Bell.shared.stop()
         // An End during the settling silence records a sit of no length, not a negative one.
-        return Session(start: min(sitStart, now), end: now, plannedSeconds: plannedSeconds,
-                       completed: now >= endDate)
+        return Session(start: min(sitStart, now), end: now, completed: now >= endDate)
     }
 
     private func ring(_ moment: Bell.Moment, due: Date, now: Date) {

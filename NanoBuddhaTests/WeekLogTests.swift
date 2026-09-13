@@ -12,7 +12,7 @@ final class WeekLogTests: XCTestCase {
 
     private func session(daysAgo: Int, seconds: Int, completed: Bool = true) -> Session {
         let start = calendar.date(byAdding: .day, value: -daysAgo, to: now)!
-        return Session(start: start, end: start + TimeInterval(seconds), plannedSeconds: seconds, completed: completed)
+        return Session(start: start, end: start + TimeInterval(seconds), completed: completed)
     }
 
     func testFormatsTheLastSevenDaysOldestFirst() {
