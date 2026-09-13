@@ -36,11 +36,8 @@ struct RootView: View {
 
     private func beginSit() {
         Bell.requestNotificationPermission()
-        let seconds = DurationPlanner.realSeconds(intendedSeconds: store.intendedSeconds)
-        // Launch argument used by the UI test so a sit finishes in seconds.
-        let quickSit = ProcessInfo.processInfo.arguments.contains("-quickSit")
-        phase = .sitting(plannedSeconds: quickSit ? 5 : seconds,
-                         settlingSeconds: quickSit ? 0 : DurationPlanner.settlingSeconds)
+        let plan = DurationPlanner.plan(intendedSeconds: store.intendedSeconds)
+        phase = .sitting(plannedSeconds: plan.plannedSeconds, settlingSeconds: plan.settlingSeconds)
     }
 
     private func beginSitIfRequested() {

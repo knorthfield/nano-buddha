@@ -33,7 +33,12 @@ struct HistoryView: View {
         .navigationTitle("History")
         .toolbar {
             Button(copied ? "Copied" : "Copy week", systemImage: copied ? "checkmark" : "doc.on.doc") {
+                #if os(macOS)
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(WeekLog.markdown(sessions: store.sessions), forType: .string)
+                #else
                 UIPasteboard.general.string = WeekLog.markdown(sessions: store.sessions)
+                #endif
                 copied = true
                 Task {
                     try? await Task.sleep(for: .seconds(2))

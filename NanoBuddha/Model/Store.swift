@@ -6,13 +6,10 @@ import WidgetKit
 
 @Observable
 final class Store {
-    #if os(macOS)
-    /// A Mac group container is only open to an id prefixed by the team, so the build puts it
-    /// in Info.plist (`NanoBuddhaAppGroup` in project.yml).
-    static let appGroup = Bundle.main.object(forInfoDictionaryKey: "NanoBuddhaAppGroup") as? String ?? ""
-    #else
-    static let appGroup = "group.com.krisnorthfield.NanoBuddha"
-    #endif
+    /// The Mac's group container is only open to a team-prefixed id, so the Mac targets put theirs
+    /// in Info.plist (`NanoBuddhaAppGroup` in project.yml). Everyone else uses the group.* id.
+    static let appGroup = Bundle.main.object(forInfoDictionaryKey: "NanoBuddhaAppGroup") as? String
+        ?? "group.com.krisnorthfield.NanoBuddha"
 
     private(set) var sessions: [Session] = []
     /// The duration the user intends to sit. Grows by 15 s per completed sit.

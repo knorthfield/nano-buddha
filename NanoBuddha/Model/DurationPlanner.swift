@@ -11,4 +11,13 @@ enum DurationPlanner {
                             jitter: Int = Int.random(in: -jitterSeconds...jitterSeconds)) -> Int {
         max(60, intendedSeconds + jitter)
     }
+
+    /// The sit to begin now. `-quickSit` (a launch argument for the tests) makes it a 5 s sit
+    /// with no settling silence.
+    static func plan(intendedSeconds: Int,
+                     arguments: [String] = ProcessInfo.processInfo.arguments)
+        -> (plannedSeconds: Int, settlingSeconds: Int) {
+        if arguments.contains("-quickSit") { return (5, 0) }
+        return (realSeconds(intendedSeconds: intendedSeconds), settlingSeconds)
+    }
 }

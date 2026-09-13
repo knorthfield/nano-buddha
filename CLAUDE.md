@@ -74,7 +74,8 @@ sit screen keeps the TV awake (`isIdleTimerDisabled`) and the remote's Menu butt
 (`.onExitCommand`) so a sit cannot run on behind the tvOS home screen.
 `NanoBuddhaMac` is the native Mac app (`NanoBuddhaMac/`, macOS 26, same bundle id as the iPhone
 app, not Catalyst). Like the TV it compiles only the shared `Sit`, `Store`, `Bell`, `CloudSync`,
-`WeekLog`, `PrimaryButton` and `Starfield`: no HealthKit, WatchConnectivity, App Shortcut or Live
+`WeekLog`, `PrimaryButton`, `Starfield` and `HistoryView` (Copy week uses `NSPasteboard` under
+`#if os(macOS)`): no HealthKit, WatchConnectivity, App Shortcut or Live
 Activity on the Mac. `NanoBuddhaMacWidgets` is the Mac widget extension: the same `SitWidget.swift`
 as a desktop and Notification Centre widget (families small and medium, `#if os(macOS)`; the
 accessory families do not exist on macOS). The Mac store lives in the app group container so the
@@ -83,7 +84,7 @@ widget can read it, but a Mac group container is only open to an id prefixed by 
 automatic Mac profiles never did). So the Mac app and widget use
 `$(TeamIdentifierPrefix)com.krisnorthfield.NanoBuddha` in their entitlements, the build writes
 the same id into their Info.plist as `NanoBuddhaAppGroup` (from `DEVELOPMENT_TEAM`), and
-`Store.appGroup` reads it from there with `#if os(macOS)`. The Mac app syncs over iCloud only.
+`Store.appGroup` reads it from there and falls back to the `group.*` id. The Mac app syncs over iCloud only.
 `PRODUCT_NAME` is "Nano Buddha": the widget gallery labels the widgets with the app's file
 name, not its display name. The bowl plays
 through `AVAudioPlayer` without an `AVAudioSession` (none on macOS, `#if !os(macOS)` in

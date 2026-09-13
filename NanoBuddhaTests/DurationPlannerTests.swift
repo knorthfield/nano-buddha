@@ -13,6 +13,18 @@ final class DurationPlannerTests: XCTestCase {
         }
     }
 
+    func testQuickSitPlansFiveSecondsWithNoSettling() {
+        let plan = DurationPlanner.plan(intendedSeconds: 600, arguments: ["-quickSit"])
+        XCTAssertEqual(plan.plannedSeconds, 5)
+        XCTAssertEqual(plan.settlingSeconds, 0)
+    }
+
+    func testPlanKeepsSettlingAndJitter() {
+        let plan = DurationPlanner.plan(intendedSeconds: 600, arguments: [])
+        XCTAssertEqual(plan.settlingSeconds, DurationPlanner.settlingSeconds)
+        XCTAssert((540...660).contains(plan.plannedSeconds), "\(plan.plannedSeconds) out of range")
+    }
+
     func testStoreGrowsOnlyOnCompletedSessions() throws {
         let url = temporaryURL()
         let store = Store(fileURL: url)

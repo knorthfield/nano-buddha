@@ -33,7 +33,7 @@ struct MacHomeView: View {
             .background(Starfield(secondsPerTurn: 72_000 / Double(store.intendedSeconds)))
             .navigationTitle("Nano Buddha")
             .toolbar {
-                NavigationLink("History") { MacHistoryView() }
+                NavigationLink("History") { HistoryView() }
             }
         }
     }
