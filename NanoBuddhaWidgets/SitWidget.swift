@@ -41,6 +41,7 @@ struct SitWidgetView: View {
     var body: some View {
         Group {
             switch family {
+            #if !os(macOS)
             case .accessoryInline:
                 Label {
                     Text("\(entry.intendedMinutes) min · \(entry.weekSits) sits this week")
@@ -63,6 +64,7 @@ struct SitWidgetView: View {
                     Text("\(entry.intendedMinutes) min next")
                     Text("\(entry.weekSits) sits · \(entry.weekMinutes) min, 7 days").font(.caption)
                 }
+            #endif
             default:
                 VStack(alignment: .leading, spacing: 8) {
                     Label("\(entry.intendedMinutes) min", systemImage: Self.symbol)
@@ -76,6 +78,9 @@ struct SitWidgetView: View {
             }
         }
         .containerBackground(for: .widget) {
+            #if os(macOS)
+            Color(nsColor: .windowBackgroundColor)
+            #else
             if family == .accessoryCircular {
                 AccessoryWidgetBackground()
             } else {
@@ -85,6 +90,7 @@ struct SitWidgetView: View {
                 Color(.systemBackground)
                 #endif
             }
+            #endif
         }
     }
 }
@@ -98,6 +104,8 @@ struct SitWidget: Widget {
         .description("Your next sit and the last seven days.")
         #if os(watchOS)
         .supportedFamilies([.accessoryCorner, .accessoryCircular, .accessoryRectangular, .accessoryInline])
+        #elseif os(macOS)
+        .supportedFamilies([.systemSmall, .systemMedium])
         #else
         .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryRectangular, .accessoryInline])
         #endif

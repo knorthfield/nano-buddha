@@ -6,7 +6,13 @@ import WidgetKit
 
 @Observable
 final class Store {
+    #if os(macOS)
+    /// A Mac group container is only open to an id prefixed by the team, so the build puts it
+    /// in Info.plist (`NanoBuddhaAppGroup` in project.yml).
+    static let appGroup = Bundle.main.object(forInfoDictionaryKey: "NanoBuddhaAppGroup") as? String ?? ""
+    #else
     static let appGroup = "group.com.krisnorthfield.NanoBuddha"
+    #endif
 
     private(set) var sessions: [Session] = []
     /// The duration the user intends to sit. Grows by 15 s per completed sit.
@@ -40,17 +46,12 @@ final class Store {
         let files = FileManager.default
         let documents = files.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("store.json")
-        #if os(macOS)
-        // No widget on the Mac, and the sandbox refuses a group container without the entitlement.
-        return documents
-        #else
         guard let group = files.containerURL(forSecurityApplicationGroupIdentifier: appGroup)?
             .appendingPathComponent("store.json") else { return documents }
         if !files.fileExists(atPath: group.path), files.fileExists(atPath: documents.path) {
             try? files.moveItem(at: documents, to: group)
         }
         return group
-        #endif
     }
 
     init(fileURL: URL = Store.defaultFileURL) {

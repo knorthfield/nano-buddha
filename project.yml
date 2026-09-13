@@ -213,25 +213,66 @@ targets:
       - NanoBuddha/Resources/bowl.wav
       - NanoBuddha/Resources/Assets.xcassets
       - NanoBuddha/AppIcon.icon
+    dependencies:
+      - target: NanoBuddhaMacWidgets
+        embed: true
     entitlements:
       path: NanoBuddhaMac/NanoBuddhaMac.entitlements
       properties:
         com.apple.security.app-sandbox: true
         com.apple.developer.ubiquity-kvstore-identifier: $(TeamIdentifierPrefix)com.krisnorthfield.NanoBuddha
+        # A Mac group container is only open to an id prefixed by the team, not to the iPhone's
+        # group.* id; Store reads the id from the plist.
+        com.apple.security.application-groups: [$(TeamIdentifierPrefix)com.krisnorthfield.NanoBuddha]
     info:
       path: NanoBuddhaMac/Info.plist
       properties:
         CFBundleDisplayName: Nano Buddha
+        NanoBuddhaAppGroup: $(DEVELOPMENT_TEAM).com.krisnorthfield.NanoBuddha
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "1"
     settings:
       base:
         # Same bundle id as the iPhone app: a Mac counterpart shares it (universal purchase).
         PRODUCT_BUNDLE_IDENTIFIER: com.krisnorthfield.NanoBuddha
+        PRODUCT_NAME: Nano Buddha  # The file name in Applications and in the widget gallery.
         SWIFT_VERSION: "5.9"
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         GENERATE_INFOPLIST_FILE: NO
+  NanoBuddhaMacWidgets:
+    type: app-extension
+    platform: macOS
+    sources:
+      - NanoBuddhaMacWidgets
+      - NanoBuddhaWidgets/SitWidget.swift
+      - NanoBuddha/Model/Store.swift
+      - NanoBuddha/Model/Session.swift
+      - NanoBuddha/Model/DurationPlanner.swift
+      - NanoBuddha/Resources/Assets.xcassets
+    info:
+      path: NanoBuddhaMacWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: Nano Buddha
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        NanoBuddhaAppGroup: $(DEVELOPMENT_TEAM).com.krisnorthfield.NanoBuddha
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: NanoBuddhaMacWidgets/NanoBuddhaMacWidgets.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.application-groups: [$(TeamIdentifierPrefix)com.krisnorthfield.NanoBuddha]
+    settings:
+      base:
+        # Prefixed by the Mac app's bundle id, the host of this extension.
+        PRODUCT_BUNDLE_IDENTIFIER: com.krisnorthfield.NanoBuddha.NanoBuddhaMacWidgets
+        SWIFT_VERSION: "5.9"
+        CODE_SIGN_STYLE: Automatic
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        GENERATE_INFOPLIST_FILE: NO
+        SKIP_INSTALL: YES
   NanoBuddhaTests:
     type: bundle.unit-test
     platform: iOS
@@ -288,5 +329,6 @@ schemes:
     build:
       targets:
         NanoBuddhaMac: all
+        NanoBuddhaMacWidgets: all
     run:
       config: Debug

@@ -74,10 +74,18 @@ sit screen keeps the TV awake (`isIdleTimerDisabled`) and the remote's Menu butt
 (`.onExitCommand`) so a sit cannot run on behind the tvOS home screen.
 `NanoBuddhaMac` is the native Mac app (`NanoBuddhaMac/`, macOS 26, same bundle id as the iPhone
 app, not Catalyst). Like the TV it compiles only the shared `Sit`, `Store`, `Bell`, `CloudSync`,
-`WeekLog`, `PrimaryButton` and `Starfield`: no HealthKit, WatchConnectivity, widgets, App Shortcut
-or Live Activity on the Mac. The store lives in the sandbox container's Documents (`Store.swift`
-returns it with `#if os(macOS)`: the group container path exists on the Mac even without the
-entitlement, and the sandbox then refuses the write) and syncs over iCloud only. The bowl plays
+`WeekLog`, `PrimaryButton` and `Starfield`: no HealthKit, WatchConnectivity, App Shortcut or Live
+Activity on the Mac. `NanoBuddhaMacWidgets` is the Mac widget extension: the same `SitWidget.swift`
+as a desktop and Notification Centre widget (families small and medium, `#if os(macOS)`; the
+accessory families do not exist on macOS). The Mac store lives in the app group container so the
+widget can read it, but a Mac group container is only open to an id prefixed by the team id
+(`containermanagerd` rejects `group.*` unless the provisioning profile carries it, and the
+automatic Mac profiles never did). So the Mac app and widget use
+`$(TeamIdentifierPrefix)com.krisnorthfield.NanoBuddha` in their entitlements, the build writes
+the same id into their Info.plist as `NanoBuddhaAppGroup` (from `DEVELOPMENT_TEAM`), and
+`Store.appGroup` reads it from there with `#if os(macOS)`. The Mac app syncs over iCloud only.
+`PRODUCT_NAME` is "Nano Buddha": the widget gallery labels the widgets with the app's file
+name, not its display name. The bowl plays
 through `AVAudioPlayer` without an `AVAudioSession` (none on macOS, `#if !os(macOS)` in
 `Bell.swift`), and the bells also arrive as notifications when the app is in the background. The
 sit view holds a `ProcessInfo` activity (`idleSystemSleepDisabled`) so the Mac does not sleep
@@ -135,7 +143,17 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
   is Copy week in History) and screenshot with `screencapture -x -R x,y,w,h` from the window
   frame (`get {position, size} of window 1`). Dark mode: `tell appearance preferences to set
   dark mode to true` in System Events. The store is
-  `~/Library/Containers/com.krisnorthfield.NanoBuddha/Data/Documents/store.json`.
+  `~/Library/Group Containers/<team id>.com.krisnorthfield.NanoBuddha/store.json`.
+- The Mac widget is placed by hand: Notification Centre (click the clock) > Edit Widgets, search
+  "Nano" and click a size; or right-click the desktop > Edit Widgets. No CLI does it, but System
+  Events can (`click menu bar item 2 of menu bar 1 of process "ControlCenter"` opens the centre,
+  `button 1 of scroll area 1 of group 1 of group 1 of window 1 of process "NotificationCenter"`
+  is Edit Widgets, then `keystroke "Nano"` and `click at {x, y}` on the widget). `pluginkit -m -i
+  com.krisnorthfield.NanoBuddha.NanoBuddhaMacWidgets` shows the extension is registered. If the
+  widget shows an empty store (10 min, 0 sits), look for a REJECTED line from `containermanagerd`
+  with `/usr/bin/log show --predicate 'process == "containermanagerd" AND eventMessage CONTAINS
+  "krisnorthfield"'` (plain `log` is a zsh builtin that prints nothing). The gallery caches the
+  app name and icon; `killall NotificationCenter chronod` refreshes them.
 - Running the watch app alone needs no paired simulators. Testing sync does: `xcrun simctl pair
   <watch udid> <iphone udid>` (`simctl list pairs`). The simulator has no haptics.
 - `WKExtendedRuntimeSession.notifyUser(hapticType:)` works only for `alarm` sessions started
