@@ -127,20 +127,21 @@ final class Bell: NSObject, AVAudioPlayerDelegate {
         player.currentTime = 0
         activateSessionAndPlay()
     }
+    #endif
 
     private func activateSessionAndPlay() {
+        #if !os(macOS)
         let session = AVAudioSession.sharedInstance()
         // Playback ignores the silent switch; ducking lowers other audio instead of stopping it.
         try? session.setCategory(.playback, options: [.duckOthers])
         try? session.setActive(true)
+        #endif
         player?.play()
     }
 
     private func deactivateSession() {
+        #if !os(macOS)
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        #endif
     }
-    #else
-    private func activateSessionAndPlay() { player?.play() }
-    private func deactivateSession() {}
-    #endif
 }

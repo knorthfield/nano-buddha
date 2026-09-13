@@ -20,7 +20,7 @@ struct MacRootView: View {
                 phase = .done(session)
             }
         case .done(let session):
-            MacDoneView(session: session) { phase = .home }
+            DoneView(session: session) { phase = .home }
         }
     }
 

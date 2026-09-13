@@ -74,8 +74,8 @@ sit screen keeps the TV awake (`isIdleTimerDisabled`) and the remote's Menu butt
 (`.onExitCommand`) so a sit cannot run on behind the tvOS home screen.
 `NanoBuddhaMac` is the native Mac app (`NanoBuddhaMac/`, macOS 26, same bundle id as the iPhone
 app, not Catalyst). Like the TV it compiles only the shared `Sit`, `Store`, `Bell`, `CloudSync`,
-`WeekLog`, `PrimaryButton`, `Starfield` and `HistoryView` (Copy week uses `NSPasteboard` under
-`#if os(macOS)`): no HealthKit, WatchConnectivity, App Shortcut or Live
+`WeekLog`, `PrimaryButton`, `Starfield`, `HistoryView` (Copy week uses `NSPasteboard` under
+`#if os(macOS)`) and `DoneView` (no Health line there): no HealthKit, WatchConnectivity, App Shortcut or Live
 Activity on the Mac. `NanoBuddhaMacWidgets` is the Mac widget extension: the same `SitWidget.swift`
 as a desktop and Notification Centre widget (families small and medium, `#if os(macOS)`; the
 accessory families do not exist on macOS). The Mac store lives in the app group container so the

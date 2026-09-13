@@ -192,6 +192,7 @@ targets:
       - NanoBuddha/Views/PrimaryButton.swift
       - NanoBuddha/Views/Starfield.swift
       - NanoBuddha/Views/HistoryView.swift
+      - NanoBuddha/Views/DoneView.swift
       - NanoBuddha/Resources/bowl.wav
       - NanoBuddha/Resources/Assets.xcassets
       - NanoBuddha/AppIcon.icon
