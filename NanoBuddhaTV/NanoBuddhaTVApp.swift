@@ -8,6 +8,10 @@ struct NanoBuddhaTVApp: App {
         WindowGroup {
             TVRootView()
                 .environment(store)
+                .onAppear {
+                    store.didSave = { CloudSync.shared.push() }
+                    CloudSync.shared.activate(store: store)
+                }
         }
     }
 }

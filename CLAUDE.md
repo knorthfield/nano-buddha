@@ -54,11 +54,20 @@ Documents copy there) so the watch complication can read it, and it saves to Hea
 snapshot as the application context, the other side merges it (`Store.merge`: union of sits by
 id, the more recently changed intended duration wins). The widget targets do not compile
 `Sync.swift`.
+`Model/CloudSync.swift` does the same for every device on one iCloud account (iPhone, iPad,
+watch, TV) over the iCloud key-value store (`NSUbiquitousKeyValueStore`, key `snapshot`, the
+last 4000 sits, merged with `Store.merge`; the entitlement
+`com.apple.developer.ubiquity-kvstore-identifier` is the iPhone bundle id in all three apps so
+they share one store). The apps set `Store.didSave` themselves to push to both syncs. The
+widget targets do not compile it. The App IDs need the iCloud key-value capability for device
+builds; the simulator only syncs when an iCloud account is signed in via Settings (no CLI for
+that), and without one the key-value calls are silent no-ops.
 `NanoBuddhaTV` is the Apple TV app (`NanoBuddhaTV/`, tvOS 26, same bundle id as the iPhone app
 for universal purchase, not embedded in it). It compiles the shared `Sit`, `Store`, `Bell`,
-`PrimaryButton` and `Starfield`, and nothing else: tvOS has no HealthKit, WatchConnectivity,
-WidgetKit, pasteboard or alert notifications, so the TV store is standalone (`store.json` in
-Documents, not synced), there is no Health write, no Copy week, and the bowl is audio only
+`CloudSync`, `PrimaryButton` and `Starfield`, and nothing else: tvOS has no HealthKit, WatchConnectivity,
+WidgetKit, pasteboard or alert notifications, so the TV store lives in Documents and syncs only
+over iCloud (`CloudSync`, no WatchConnectivity), there is no Health write, no Copy week, and the
+bowl is audio only
 (`Bell.swift` skips notifications and haptics with `#if os(tvOS)`; `Store.swift` guards
 WidgetKit with `canImport`). The home screen has no first-run picker, only the nudge row. The
 sit screen keeps the TV awake (`isIdleTimerDisabled`) and the remote's Menu button ends the sit

@@ -8,7 +8,11 @@ struct NanoBuddhaWatchApp: App {
         WindowGroup {
             WatchRootView()
                 .environment(store)
-                .onAppear { Sync.shared.activate(store: store) }
+                .onAppear {
+                    store.didSave = { Sync.shared.push(); CloudSync.shared.push() }
+                    Sync.shared.activate(store: store)
+                    CloudSync.shared.activate(store: store)
+                }
         }
     }
 }

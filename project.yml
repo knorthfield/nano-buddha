@@ -37,6 +37,7 @@ targets:
       properties:
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.access: []
+        com.apple.developer.ubiquity-kvstore-identifier: $(TeamIdentifierPrefix)com.krisnorthfield.NanoBuddha
         com.apple.security.application-groups: [group.com.krisnorthfield.NanoBuddha]
     settings:
       base:
@@ -90,6 +91,7 @@ targets:
       - NanoBuddha/Model/Bell.swift
       - NanoBuddha/Model/Sit.swift
       - NanoBuddha/Model/Sync.swift
+      - NanoBuddha/Model/CloudSync.swift
       - NanoBuddha/Model/BeginSitIntent.swift
       - NanoBuddha/Model/AppShortcuts.swift
       - NanoBuddha/Views/PrimaryButton.swift
@@ -116,6 +118,7 @@ targets:
       properties:
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.access: []
+        com.apple.developer.ubiquity-kvstore-identifier: $(TeamIdentifierPrefix)com.krisnorthfield.NanoBuddha
         com.apple.security.application-groups: [group.com.krisnorthfield.NanoBuddha]
     settings:
       base:
@@ -166,11 +169,16 @@ targets:
       - NanoBuddha/Model/DurationPlanner.swift
       - NanoBuddha/Model/Bell.swift
       - NanoBuddha/Model/Sit.swift
+      - NanoBuddha/Model/CloudSync.swift
       - NanoBuddha/Views/PrimaryButton.swift
       - NanoBuddha/Views/Starfield.swift
       - NanoBuddha/Resources/bowl.wav
       - NanoBuddha/Resources/Assets.xcassets
       - NanoBuddhaTV/Assets.xcassets
+    entitlements:
+      path: NanoBuddhaTV/NanoBuddhaTV.entitlements
+      properties:
+        com.apple.developer.ubiquity-kvstore-identifier: $(TeamIdentifierPrefix)com.krisnorthfield.NanoBuddha
     info:
       path: NanoBuddhaTV/Info.plist
       properties:

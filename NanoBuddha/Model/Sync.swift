@@ -12,12 +12,11 @@ final class Sync: NSObject, WCSessionDelegate {
     func activate(store: Store) {
         guard WCSession.isSupported() else { return }
         self.store = store
-        store.didSave = { [weak self] in self?.push() }
         WCSession.default.delegate = self
         WCSession.default.activate()
     }
 
-    private func push() {
+    func push() {
         guard let store, WCSession.default.activationState == .activated else { return }
         var snapshot = store.snapshot
         snapshot.sessions = Array(snapshot.sessions.suffix(Self.maxSessions))
