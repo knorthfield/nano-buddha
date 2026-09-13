@@ -10,6 +10,8 @@ final class CloudSync {
     private var store: Store?
 
     func activate(store: Store) {
+        // A Mac window reopened from the Dock calls this again; one observer is enough.
+        guard self.store == nil else { return }
         self.store = store
         NotificationCenter.default.addObserver(
             forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification,

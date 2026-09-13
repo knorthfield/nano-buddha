@@ -34,11 +34,14 @@ struct MacSitView: View {
             breathing = !reduceMotion
         }
         .onReceive(tick) { now in sit.tick(now: now) }
+        // Closing the window ends the sit like End does.
+        .onDisappear { finish() }
     }
 
     private func finish() {
-        if let awake { ProcessInfo.processInfo.endActivity(awake) }
-        awake = nil
+        guard let awake else { return }  // End also removes the view, so this runs twice.
+        ProcessInfo.processInfo.endActivity(awake)
+        self.awake = nil
         onFinish(sit.finish())
     }
 }

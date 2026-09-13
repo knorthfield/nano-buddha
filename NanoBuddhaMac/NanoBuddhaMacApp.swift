@@ -14,5 +14,7 @@ struct NanoBuddhaMacApp: App {
                 }
         }
         .defaultSize(width: 900, height: 600)
+        // One window: a second one would run a second sit on the same bells.
+        .commands { CommandGroup(replacing: .newItem) {} }
     }
 }

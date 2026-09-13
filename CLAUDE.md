@@ -91,7 +91,10 @@ through `AVAudioPlayer` without an `AVAudioSession` (none on macOS, `#if !os(mac
 `Bell.swift`), and the bells also arrive as notifications when the app is in the background. The
 sit view holds a `ProcessInfo` activity (`idleSystemSleepDisabled`) so the Mac does not sleep
 mid-sit, and Escape ends the sit (`.keyboardShortcut(.cancelAction)` on End; `.onExitCommand`
-did nothing there). Copy week uses `NSPasteboard`. The window opens landscape (900 by 600);
+did nothing there). Closing the window ends it too (`.onDisappear`, which also releases the
+activity), and New Window is removed (`CommandGroup(replacing: .newItem)`, which takes the whole File
+menu with it; Cmd-W still closes) so a second window cannot run a second sit on the same bells; `CloudSync.activate` ignores a second call from
+a window reopened from the Dock. Copy week uses `NSPasteboard`. The window opens landscape (900 by 600);
 `WindowGroup(id: "main")` because a frame stored under the unnamed scene id kept coming back
 after the preferences were cleared. The home screen has no first-run picker, only the nudge row.
 The app follows the system appearance: dark mode is the spiral galaxy on black, light mode is
