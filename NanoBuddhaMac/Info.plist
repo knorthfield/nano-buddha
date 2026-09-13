@@ -21,6 +21,6 @@
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>NanoBuddhaAppGroup</key>
-	<string>$(DEVELOPMENT_TEAM).com.krisnorthfield.NanoBuddha</string>
+	<string>$(NANOBUDDHA_MAC_APP_GROUP)</string>
 </dict>
 </plist>

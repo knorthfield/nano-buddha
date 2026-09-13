@@ -81,9 +81,9 @@ as a desktop and Notification Centre widget (families small and medium, `#if os(
 accessory families do not exist on macOS). The Mac store lives in the app group container so the
 widget can read it, but a Mac group container is only open to an id prefixed by the team id
 (`containermanagerd` rejects `group.*` unless the provisioning profile carries it, and the
-automatic Mac profiles never did). So the Mac app and widget use
-`$(TeamIdentifierPrefix)com.krisnorthfield.NanoBuddha` in their entitlements, the build writes
-the same id into their Info.plist as `NanoBuddhaAppGroup` (from `DEVELOPMENT_TEAM`), and
+automatic Mac profiles never did). So the Mac app and widget use the one build setting
+`NANOBUDDHA_MAC_APP_GROUP` (`$(DEVELOPMENT_TEAM).com.krisnorthfield.NanoBuddha`, project level in
+`project.yml`) in their entitlements and as `NanoBuddhaAppGroup` in their Info.plist, and
 `Store.appGroup` reads it from there and falls back to the `group.*` id. The Mac app syncs over iCloud only.
 `PRODUCT_NAME` is "Nano Buddha": the widget gallery labels the widgets with the app's file
 name, not its display name. The bowl plays
@@ -103,6 +103,7 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
 
 ## Build and run
 - `project.yml` is the source of truth; `NanoBuddha.xcodeproj` is generated and git-ignored.
+  The three widget extensions come from its `WidgetExtension` target template.
 - `scripts/build.sh` — xcodegen + simulator build.
 - `scripts/run.sh` — build, then install and launch on the simulator (`SIM_NAME` env var overrides the device).
 - `scripts/test.sh` — unit tests and UI test.

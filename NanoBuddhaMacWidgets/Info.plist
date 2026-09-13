@@ -26,6 +26,6 @@
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
 	<key>NanoBuddhaAppGroup</key>
-	<string>$(DEVELOPMENT_TEAM).com.krisnorthfield.NanoBuddha</string>
+	<string>$(NANOBUDDHA_MAC_APP_GROUP)</string>
 </dict>
 </plist>
