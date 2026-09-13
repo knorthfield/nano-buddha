@@ -8,6 +8,7 @@ struct SitView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var sit = Sit()
     @State private var animating = false
+    @State private var finished = false
     private let tick = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -54,6 +55,8 @@ struct SitView: View {
     }
 
     private func finish() {
+        guard !finished else { return }  // End and the Live Activity can both ask.
+        finished = true
         UIApplication.shared.isIdleTimerDisabled = false
         SitActivity.end()
         onFinish(sit.finish())

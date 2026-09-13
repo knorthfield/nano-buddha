@@ -10,7 +10,7 @@ final class Sync: NSObject, WCSessionDelegate {
     private var store: Store?
 
     func activate(store: Store) {
-        guard WCSession.isSupported() else { return }
+        guard WCSession.isSupported(), self.store == nil else { return }
         self.store = store
         WCSession.default.delegate = self
         WCSession.default.activate()
@@ -24,16 +24,19 @@ final class Sync: NSObject, WCSessionDelegate {
         try? WCSession.default.updateApplicationContext(["snapshot": data])
     }
 
-    private func merge(_ context: [String: Any]) {
+    /// The store belongs to the main thread; WatchConnectivity calls the delegate on its own queue.
+    private func merge(_ context: [String: Any], then completion: @escaping () -> Void = {}) {
         guard let data = context["snapshot"] as? Data,
               let snapshot = try? JSONDecoder().decode(Store.Snapshot.self, from: data) else { return }
-        DispatchQueue.main.async { _ = self.store?.merge(snapshot) }
+        DispatchQueue.main.async {
+            self.store?.merge(snapshot)
+            completion()
+        }
     }
 
     func session(_ session: WCSession, activationDidCompleteWith state: WCSessionActivationState, error: Error?) {
         guard state == .activated else { return }
-        merge(session.receivedApplicationContext)
-        push()
+        merge(session.receivedApplicationContext) { self.push() }
     }
 
     func session(_ session: WCSession, didReceiveApplicationContext context: [String: Any]) {

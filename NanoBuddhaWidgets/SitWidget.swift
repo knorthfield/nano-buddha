@@ -8,7 +8,7 @@ struct SitEntry: TimelineEntry {
     let weekMinutes: Int
 }
 
-/// One entry, refreshed when the app saves the store.
+/// One entry, refreshed when the app saves the store and at midnight, when the 7-day window moves.
 struct SitProvider: TimelineProvider {
     func placeholder(in context: Context) -> SitEntry {
         SitEntry(date: .now, intendedMinutes: 10, weekSits: 5, weekMinutes: 52)
@@ -19,7 +19,8 @@ struct SitProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<SitEntry>) -> Void) {
-        completion(Timeline(entries: [current()], policy: .never))
+        let midnight = Calendar.current.startOfDay(for: .now).addingTimeInterval(86_400)
+        completion(Timeline(entries: [current()], policy: .after(midnight)))
     }
 
     private func current() -> SitEntry {
