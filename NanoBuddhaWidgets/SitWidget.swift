@@ -39,6 +39,14 @@ struct SitWidgetView: View {
     let entry: SitEntry
     private static let symbol = "figure.mind.and.body"
 
+    private var isExtraLarge: Bool {
+        #if os(watchOS)
+        false
+        #else
+        family == .systemExtraLarge || family == .systemExtraLargePortrait
+        #endif
+    }
+
     var body: some View {
         Group {
             switch family {
@@ -69,12 +77,13 @@ struct SitWidgetView: View {
             default:
                 VStack(alignment: .leading, spacing: 8) {
                     Label("\(entry.intendedMinutes) min", systemImage: Self.symbol)
-                        .font(.largeTitle.bold()).monospacedDigit()
+                        .font(isExtraLarge ? .system(size: 80, weight: .bold) : .largeTitle.bold())
+                        .monospacedDigit()
                     Spacer()
                     Text("\(entry.weekSits) sits · \(entry.weekMinutes) min")
                     Text("last 7 days").foregroundStyle(.secondary)
                 }
-                .font(.subheadline)
+                .font(isExtraLarge ? .largeTitle : .subheadline)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
         }
@@ -106,9 +115,10 @@ struct SitWidget: Widget {
         #if os(watchOS)
         .supportedFamilies([.accessoryCorner, .accessoryCircular, .accessoryRectangular, .accessoryInline])
         #elseif os(macOS)
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemExtraLarge, .systemExtraLargePortrait])
         #else
-        .supportedFamilies([.systemSmall, .accessoryCircular, .accessoryRectangular, .accessoryInline])
+        .supportedFamilies([.systemSmall, .systemExtraLarge, .systemExtraLargePortrait,
+                            .accessoryCircular, .accessoryRectangular, .accessoryInline])
         #endif
     }
 }

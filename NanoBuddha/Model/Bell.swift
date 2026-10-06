@@ -46,8 +46,8 @@ final class Bell: NSObject, AVAudioPlayerDelegate {
         super.init()
         #if !os(macOS)
         NotificationCenter.default.addObserver(
-            self, selector: #selector(handleInterruption),
-            name: AVAudioSession.interruptionNotification, object: AVAudioSession.sharedInstance())
+            self, selector: #selector(handleResumptionRecommendation),
+            name: AVAudioSession.resumptionRecommendationNotification, object: AVAudioSession.sharedInstance())
         #endif
     }
 
@@ -116,12 +116,9 @@ final class Bell: NSObject, AVAudioPlayerDelegate {
     #if !os(macOS)
     /// A phone call or Siri stops the bowl. When the interruption ends, ring it again from the
     /// start: a bowl resumed mid-decay sounds wrong, and the point is that the bell is heard.
-    @objc private func handleInterruption(_ notification: Notification) {
-        guard let info = notification.userInfo,
-              let typeValue = info[AVAudioSessionInterruptionTypeKey] as? UInt,
-              AVAudioSession.InterruptionType(rawValue: typeValue) == .ended,
-              let optionsValue = info[AVAudioSessionInterruptionOptionKey] as? UInt,
-              AVAudioSession.InterruptionOptions(rawValue: optionsValue).contains(.shouldResume),
+    @objc private func handleResumptionRecommendation(_ notification: Notification) {
+        guard let context = notification.userInfo?[AVAudioSession.resumptionContextKey] as? AVAudioSession.ResumptionContext,
+              context.recommendation == .shouldResume,
               let player, !player.isPlaying
         else { return }
         player.currentTime = 0

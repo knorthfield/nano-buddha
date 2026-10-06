@@ -13,11 +13,11 @@ between your devices over iCloud (and WatchConnectivity for the watch). A sit ca
 started from a widget, Control Centre, Siri ("Begin a sit in Nano Buddha") or the Shortcuts app.
 The watch has the same widget as a complication and in the Smart Stack.
 
-SwiftUI, iOS 26+ (watchOS 26, tvOS 26 and macOS 26 for the watch, TV and Mac apps), no third-party packages.
+SwiftUI, iOS 27+ (watchOS 27, tvOS 27 and macOS 27 for the watch, TV and Mac apps), no third-party packages.
 
 ## Requirements
 
-- Xcode 26 with the iOS and watchOS simulator runtimes (the iOS scheme builds the embedded
+- Xcode 27 with the iOS and watchOS simulator runtimes (the iOS scheme builds the embedded
   watch app; `xcodebuild -downloadPlatform watchOS`), plus tvOS for `scripts/tv.sh`
 - [XcodeGen](https://github.com/yonaskolb/XcodeGen): `brew install xcodegen`
 

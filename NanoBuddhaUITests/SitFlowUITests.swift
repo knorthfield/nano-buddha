@@ -59,7 +59,7 @@ final class SitFlowUITests: XCTestCase {
         // Notification permission alert lives in SpringBoard.
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         let allowNotifications = springboard.buttons["Allow"]
-        if allowNotifications.waitForExistence(timeout: 3) { allowNotifications.tap() }
+        if allowNotifications.waitForExistence(timeout: 10) { allowNotifications.tap() }
 
         // The -quickSit bell rings after 5 s; the sit carries on until End is tapped.
         XCTAssertTrue(app.buttons["End"].waitForExistence(timeout: 5))

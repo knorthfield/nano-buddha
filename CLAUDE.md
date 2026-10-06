@@ -1,6 +1,6 @@
 # Nano Buddha
 
-iPhone and iPad meditation timer, with Apple Watch, Apple TV and Mac apps. SwiftUI, iOS 26+, no third-party packages. The Xcode GUI is never opened.
+iPhone and iPad meditation timer, with Apple Watch, Apple TV and Mac apps. SwiftUI, iOS 27+ (watchOS, tvOS and macOS 27), no third-party packages. The Xcode GUI is never opened.
 Public repo: https://github.com/knorthfield/nano-buddha (MIT).
 
 ## What it does
@@ -18,9 +18,10 @@ container `group.com.krisnorthfield.NanoBuddha` (`Store.swift` moves an old `Doc
 there on first launch and still reads the old `lastNominalMinutes` + `growthSeconds` keys) and to
 Apple Health as Mindful Minutes (`HealthWriter.swift`). History has a Copy week button that puts a
 markdown log of the last 7 days on the pasteboard (`WeekLog.swift`).
-`NanoBuddhaWidgets` is a WidgetKit extension: one widget (small home screen, lock screen
-circular/rectangular/inline) with the intended minutes and the last 7 days, and a Control Centre
-button "Begin sit" (`BeginSitIntent`, `openAppWhenRun`). `NanoBuddhaWatchWidgets` is the watchOS
+`NanoBuddhaWidgets` is a WidgetKit extension: one widget (small home screen, extra
+large and extra large portrait on iPad, lock screen circular/rectangular/inline) with the
+intended minutes and the last 7 days, and a Control Centre button
+"Begin sit" (`BeginSitIntent`, `openAppWhenRun`). `NanoBuddhaWatchWidgets` is the watchOS
 widget extension embedded in the watch app: it compiles the same `SitWidget.swift` (plus `Store`,
 `Session`, `DurationPlanner`) as complications and Smart Stack widget, families corner (watch
 only, `#if os(watchOS)`), circular, rectangular and inline; the bundle id is prefixed by the watch
@@ -65,7 +66,7 @@ they share one store). The apps set `Store.didSave` themselves to push to both s
 widget targets do not compile it. The App IDs need the iCloud key-value capability for device
 builds; the simulator only syncs when an iCloud account is signed in via Settings (no CLI for
 that), and without one the key-value calls are silent no-ops.
-`NanoBuddhaTV` is the Apple TV app (`NanoBuddhaTV/`, tvOS 26, same bundle id as the iPhone app
+`NanoBuddhaTV` is the Apple TV app (`NanoBuddhaTV/`, tvOS 27, same bundle id as the iPhone app
 for universal purchase, not embedded in it). It compiles the shared `Sit`, `Store`, `Bell`,
 `CloudSync`, `PrimaryButton`, `Starfield`, `RootView`, `NudgeRow`, `DoneView` and `HistoryView` (no
 Health line and no Copy week, `#if !os(tvOS)`), and nothing else: tvOS has no HealthKit, WatchConnectivity,
@@ -76,12 +77,12 @@ bowl is audio only
 WidgetKit with `canImport`). The home screen has no first-run picker, only the nudge row. The
 sit screen keeps the TV awake (`isIdleTimerDisabled`) and the remote's Menu button ends the sit
 (`.onExitCommand`) so a sit cannot run on behind the tvOS home screen.
-`NanoBuddhaMac` is the native Mac app (`NanoBuddhaMac/`, macOS 26, same bundle id as the iPhone
+`NanoBuddhaMac` is the native Mac app (`NanoBuddhaMac/`, macOS 27, same bundle id as the iPhone
 app, not Catalyst). Like the TV it compiles only the shared `Sit`, `Store`, `Bell`, `CloudSync`,
 `WeekLog`, `PrimaryButton`, `Starfield`, `RootView`, `NudgeRow`, `HistoryView` (Copy week uses
 `NSPasteboard` under `#if os(macOS)`) and `DoneView` (no Health line there): no HealthKit, WatchConnectivity, App Shortcut or Live
 Activity on the Mac. `NanoBuddhaMacWidgets` is the Mac widget extension: the same `SitWidget.swift`
-as a desktop and Notification Centre widget (families small and medium, `#if os(macOS)`; the
+as a desktop and Notification Centre widget (families small, medium, extra large and extra large portrait, `#if os(macOS)`; the
 accessory families do not exist on macOS). The Mac store lives in the app group container so the
 widget can read it, but a Mac group container is only open to an id prefixed by the team id
 (`containermanagerd` rejects `group.*` unless the provisioning profile carries it, and the
@@ -130,15 +131,17 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
 ## Toolchain gotchas (learned the hard way)
 - Simulator builds keep ad-hoc code signing on. Do not add `CODE_SIGNING_ALLOWED=NO`: it drops
   the HealthKit entitlement and Health calls fail.
-- Xcode 26.6 needs the iOS 26.5 simulator runtime. If `xcodebuild` says no destination matches,
-  run `xcodebuild -downloadPlatform iOS` (about 8.5 GB).
+- Xcode 27 needs the iOS 27.0 simulator runtime, and the deployment targets are 27.0, so the
+  older runtimes cannot run the apps. If `xcodebuild` says no destination matches, run
+  `xcodebuild -downloadPlatform iOS` (about 8.5 GB).
 - Two simulators can share the name "iPhone 17" (one per runtime). The scripts pass `OS=latest`
   to pick the newest one.
 - The iOS scheme builds the embedded watch app, so it needs the watchOS simulator runtime too:
   `xcodebuild -downloadPlatform watchOS`. Without it even the iPhone build fails with "This
-  scheme builds an embedded Apple Watch app. watchOS 26.5 must be installed".
+  scheme builds an embedded Apple Watch app. watchOS 27.0 must be installed". The default watch
+  simulator is "Apple Watch Series 12 (46mm)": the Series 11 exists only on the 26.5 runtime.
 - The TV target needs the tvOS simulator runtime: `xcodebuild -downloadPlatform tvOS`. An older
-  runtime (tvOS 26.2) is not enough; Xcode 26.6 refuses the destination until 26.5 is installed.
+  runtime (tvOS 26.x) is not enough; Xcode 27 refuses the destination until 27.0 is installed.
 - The tvOS app icon is not the Icon Composer bundle: tvOS wants an
   `App Icon & Top Shelf Image.brandassets` catalog (`NanoBuddhaTV/Assets.xcassets`) of layered
   images, 400x240 (@1x, @2x) and 1280x768. The two layers are `stars.svg` on black (Back) and
