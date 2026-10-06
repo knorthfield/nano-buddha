@@ -1,101 +1,107 @@
 {
-  "fill": {
-    "linear-gradient": [
+  "features" : [
+    "refractivity",
+    "specular-location"
+  ],
+  "fill" : {
+    "linear-gradient" : [
       "srgb:0.97000,0.94000,0.87000,1.00000",
       "srgb:0.90000,0.84000,0.72000,1.00000"
     ]
   },
-  "groups": [
+  "groups" : [
     {
-      "blend-mode": "darken",
-      "blur-material": 0,
-      "hidden": false,
-      "layers": [
+      "blend-mode" : "darken",
+      "blur-material" : 0,
+      "hidden" : false,
+      "layers" : [
         {
-          "blend-mode": "normal",
-          "fill": "automatic",
-          "glass": true,
-          "name": "hole",
-          "opacity": 1,
-          "position": {
-            "scale": 1,
-            "translation-in-points": [
+          "blend-mode" : "normal",
+          "fill" : "automatic",
+          "glass" : true,
+          "image-name-specializations" : [
+            {
+              "value" : "hole-light.svg"
+            },
+            {
+              "appearance" : "dark",
+              "value" : "hole.svg"
+            }
+          ],
+          "name" : "hole",
+          "opacity-specializations" : [
+            {
+              "value" : 1
+            },
+            {
+              "appearance" : "dark",
+              "value" : 0.5
+            }
+          ],
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
               -4.5,
               -7.5
             ]
-          },
-          "image-name-specializations": [
-            {
-              "value": "hole-light.svg"
-            },
-            {
-              "appearance": "dark",
-              "value": "hole.svg"
-            }
-          ]
+          }
         }
       ],
-      "lighting": "individual",
-      "name": "horizon",
-      "shadow": {
-        "kind": "neutral",
-        "opacity": 0.5
+      "lighting" : "individual",
+      "name" : "horizon",
+      "refractivity" : {
+        "depth" : 0.2778515625,
+        "enabled" : true,
+        "strength" : 1
       },
-      "specular": true,
-      "translucency": {
-        "enabled": true,
-        "value": 0
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "specular" : "outside",
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0
       }
     },
     {
-      "blur-material": null,
-      "layers": [
+      "blur-material" : null,
+      "layers" : [
         {
-          "glass": false,
-          "name": "stars",
-          "position": {
-            "scale": 1,
-            "translation-in-points": [
+          "glass" : false,
+          "image-name-specializations" : [
+            {
+              "value" : "sand.svg"
+            },
+            {
+              "appearance" : "dark",
+              "value" : "stars.svg"
+            }
+          ],
+          "name" : "stars",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
               0,
               0
             ]
-          },
-          "image-name-specializations": [
-            {
-              "value": "sand.svg"
-            },
-            {
-              "appearance": "dark",
-              "value": "stars.svg"
-            }
-          ]
+          }
         }
       ],
-      "lighting": "individual",
-      "name": "space",
-      "shadow": {
-        "kind": "neutral",
-        "opacity": 0.5
+      "lighting" : "individual",
+      "name" : "space",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
       },
-      "specular": false,
-      "translucency": {
-        "enabled": true,
-        "value": 0.5
+      "specular" : false,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
       }
     }
   ],
-  "supported-platforms": {
-    "squares": "shared"
-  },
-  "fill-specializations": [
-    {
-      "appearance": "dark",
-      "value": {
-        "linear-gradient": [
-          "display-p3:0.00000,0.00000,0.00000,1.00000",
-          "srgb:0.10000,0.07000,0.06000,1.00000"
-        ]
-      }
-    }
-  ]
+  "supported-platforms" : {
+    "squares" : "shared"
+  }
 }
