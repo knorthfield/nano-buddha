@@ -2,6 +2,8 @@
 
 An iPhone, iPad, Apple Watch, Apple TV and Mac meditation timer that quietly lengthens your sits.
 
+[Nano Buddha on the App Store](https://apps.apple.com/app/id6824602807)
+
 You choose a duration on the first run, say 10 minutes, and nudge it by a minute after that. The app never times exactly that. It adds a
 random offset of up to one minute either way, and a hidden base that grows by 15 seconds
 after every completed sit. The sit screen shows no time at all, so there is nothing to
@@ -58,6 +60,13 @@ the watch and TV scripts. Extra arguments go to the app.
   — the widget extension, the watch app, its complication extension, the Apple TV app and the
   Mac app, each compiling the shared model files it can use
 - `NanoBuddhaTests`, `NanoBuddhaUITests`
+
+## Releasing
+
+For a new version, change `MARKETING_VERSION` in `project.yml`, and raise
+`CURRENT_PROJECT_VERSION` for each upload. Every target (the apps, the watch app and the widgets)
+takes its version and build number from these two settings. The store text, review notes and
+screenshots are in `AppStore/`, and the privacy policy is `PRIVACY.md`.
 
 ## Credits
 
