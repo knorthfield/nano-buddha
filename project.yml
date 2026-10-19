@@ -2,10 +2,10 @@ name: NanoBuddha
 options:
   bundleIdPrefix: com.krisnorthfield
   deploymentTarget:
-    iOS: "27.0"
-    watchOS: "27.0"
-    tvOS: "27.0"
-    macOS: "27.0"
+    iOS: "26.0"
+    watchOS: "26.0"
+    tvOS: "26.0"
+    macOS: "26.0"
   createIntermediateGroups: true
 configFiles:
   Debug: Local.xcconfig
@@ -58,6 +58,7 @@ targets:
         CFBundleDisplayName: Nano Buddha
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "1"
+        ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         NSSupportsLiveActivities: true
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
@@ -119,6 +120,7 @@ targets:
         CFBundleDisplayName: Nano Buddha
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "1"
+        ITSAppUsesNonExemptEncryption: false
         WKApplication: true
         WKCompanionAppBundleIdentifier: com.krisnorthfield.NanoBuddha
         WKRunsIndependentlyOfCompanionApp: true
@@ -178,6 +180,7 @@ targets:
         CFBundleDisplayName: Nano Buddha
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "1"
+        ITSAppUsesNonExemptEncryption: false
     settings:
       base:
         # Same bundle id as the iPhone app: a tvOS counterpart shares it (universal purchase).
@@ -221,6 +224,8 @@ targets:
         NanoBuddhaAppGroup: $(NANOBUDDHA_MAC_APP_GROUP)  # Store reads the group id from here.
         CFBundleShortVersionString: "1.0"
         CFBundleVersion: "1"
+        ITSAppUsesNonExemptEncryption: false
+        LSApplicationCategoryType: public.app-category.healthcare-fitness  # The Mac App Store needs it.
     settings:
       base:
         # Same bundle id as the iPhone app: a Mac counterpart shares it (universal purchase).

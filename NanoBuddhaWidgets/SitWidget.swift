@@ -43,7 +43,9 @@ struct SitWidgetView: View {
         #if os(watchOS)
         false
         #else
-        family == .systemExtraLarge || family == .systemExtraLargePortrait
+        if family == .systemExtraLarge { return true }
+        if #available(iOS 27, macOS 27, *) { return family == .systemExtraLargePortrait }
+        return false
         #endif
     }
 
@@ -112,13 +114,22 @@ struct SitWidget: Widget {
         }
         .configurationDisplayName("Nano Buddha")
         .description("Your next sit and the last seven days.")
+        .supportedFamilies(families)
+    }
+
+    private var families: [WidgetFamily] {
         #if os(watchOS)
-        .supportedFamilies([.accessoryCorner, .accessoryCircular, .accessoryRectangular, .accessoryInline])
-        #elseif os(macOS)
-        .supportedFamilies([.systemSmall, .systemMedium, .systemExtraLarge, .systemExtraLargePortrait])
+        return [.accessoryCorner, .accessoryCircular, .accessoryRectangular, .accessoryInline]
         #else
-        .supportedFamilies([.systemSmall, .systemExtraLarge, .systemExtraLargePortrait,
-                            .accessoryCircular, .accessoryRectangular, .accessoryInline])
+        #if os(macOS)
+        var families: [WidgetFamily] = [.systemSmall, .systemMedium, .systemExtraLarge]
+        #else
+        var families: [WidgetFamily] = [.systemSmall, .systemExtraLarge,
+                                        .accessoryCircular, .accessoryRectangular, .accessoryInline]
+        #endif
+        // Extra large portrait is new in OS 27.
+        if #available(iOS 27, macOS 27, *) { families.append(.systemExtraLargePortrait) }
+        return families
         #endif
     }
 }

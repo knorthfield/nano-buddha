@@ -45,9 +45,16 @@ final class Bell: NSObject, AVAudioPlayerDelegate {
     private override init() {
         super.init()
         #if !os(macOS)
-        NotificationCenter.default.addObserver(
-            self, selector: #selector(handleResumptionRecommendation),
-            name: AVAudioSession.resumptionRecommendationNotification, object: AVAudioSession.sharedInstance())
+        let session = AVAudioSession.sharedInstance()
+        if #available(iOS 27, watchOS 27, tvOS 27, *) {
+            NotificationCenter.default.addObserver(
+                self, selector: #selector(handleResumptionRecommendation),
+                name: AVAudioSession.resumptionRecommendationNotification, object: session)
+        } else {
+            NotificationCenter.default.addObserver(
+                self, selector: #selector(handleInterruption),
+                name: AVAudioSession.interruptionNotification, object: session)
+        }
         #endif
     }
 
@@ -116,11 +123,27 @@ final class Bell: NSObject, AVAudioPlayerDelegate {
     #if !os(macOS)
     /// A phone call or Siri stops the bowl. When the interruption ends, ring it again from the
     /// start: a bowl resumed mid-decay sounds wrong, and the point is that the bell is heard.
+    @available(iOS 27, watchOS 27, tvOS 27, *)
     @objc private func handleResumptionRecommendation(_ notification: Notification) {
         guard let context = notification.userInfo?[AVAudioSession.resumptionContextKey] as? AVAudioSession.ResumptionContext,
-              context.recommendation == .shouldResume,
-              let player, !player.isPlaying
+              context.recommendation == .shouldResume
         else { return }
+        ringAgainFromStart()
+    }
+
+    /// The OS 26 form of the same notification, deprecated in 27.
+    @objc private func handleInterruption(_ notification: Notification) {
+        guard let info = notification.userInfo,
+              let typeValue = info[AVAudioSessionInterruptionTypeKey] as? UInt,
+              AVAudioSession.InterruptionType(rawValue: typeValue) == .ended,
+              let optionsValue = info[AVAudioSessionInterruptionOptionKey] as? UInt,
+              AVAudioSession.InterruptionOptions(rawValue: optionsValue).contains(.shouldResume)
+        else { return }
+        ringAgainFromStart()
+    }
+
+    private func ringAgainFromStart() {
+        guard let player, !player.isPlaying else { return }
         player.currentTime = 0
         activateSessionAndPlay()
     }

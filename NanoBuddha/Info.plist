@@ -20,6 +20,8 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Nano Buddha saves your meditation minutes to Health as Mindful Minutes.</string>
 	<key>NSHealthUpdateUsageDescription</key>

@@ -1,6 +1,6 @@
 # Nano Buddha
 
-iPhone and iPad meditation timer, with Apple Watch, Apple TV and Mac apps. SwiftUI, iOS 27+ (watchOS, tvOS and macOS 27), no third-party packages. The Xcode GUI is never opened.
+iPhone and iPad meditation timer, with Apple Watch, Apple TV and Mac apps. SwiftUI, iOS 26+ (watchOS, tvOS and macOS 26), no third-party packages. The Xcode GUI is never opened.
 Public repo: https://github.com/knorthfield/nano-buddha (MIT).
 
 ## What it does
@@ -66,7 +66,7 @@ they share one store). The apps set `Store.didSave` themselves to push to both s
 widget targets do not compile it. The App IDs need the iCloud key-value capability for device
 builds; the simulator only syncs when an iCloud account is signed in via Settings (no CLI for
 that), and without one the key-value calls are silent no-ops.
-`NanoBuddhaTV` is the Apple TV app (`NanoBuddhaTV/`, tvOS 27, same bundle id as the iPhone app
+`NanoBuddhaTV` is the Apple TV app (`NanoBuddhaTV/`, tvOS 26+, same bundle id as the iPhone app
 for universal purchase, not embedded in it). It compiles the shared `Sit`, `Store`, `Bell`,
 `CloudSync`, `PrimaryButton`, `Starfield`, `RootView`, `NudgeRow`, `DoneView` and `HistoryView` (no
 Health line and no Copy week, `#if !os(tvOS)`), and nothing else: tvOS has no HealthKit, WatchConnectivity,
@@ -77,7 +77,7 @@ bowl is audio only
 WidgetKit with `canImport`). The home screen has no first-run picker, only the nudge row. The
 sit screen keeps the TV awake (`isIdleTimerDisabled`) and the remote's Menu button ends the sit
 (`.onExitCommand`) so a sit cannot run on behind the tvOS home screen.
-`NanoBuddhaMac` is the native Mac app (`NanoBuddhaMac/`, macOS 27, same bundle id as the iPhone
+`NanoBuddhaMac` is the native Mac app (`NanoBuddhaMac/`, macOS 26+, same bundle id as the iPhone
 app, not Catalyst). Like the TV it compiles only the shared `Sit`, `Store`, `Bell`, `CloudSync`,
 `WeekLog`, `PrimaryButton`, `Starfield`, `RootView`, `NudgeRow`, `HistoryView` (Copy week uses
 `NSPasteboard` under `#if os(macOS)`) and `DoneView` (no Health line there): no HealthKit, WatchConnectivity, App Shortcut or Live
@@ -131,9 +131,13 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
 ## Toolchain gotchas (learned the hard way)
 - Simulator builds keep ad-hoc code signing on. Do not add `CODE_SIGNING_ALLOWED=NO`: it drops
   the HealthKit entitlement and Health calls fail.
-- Xcode 27 needs the iOS 27.0 simulator runtime, and the deployment targets are 27.0, so the
-  older runtimes cannot run the apps. If `xcodebuild` says no destination matches, run
-  `xcodebuild -downloadPlatform iOS` (about 8.5 GB).
+- Xcode 27 needs the iOS 27.0 simulator runtime. If `xcodebuild` says no destination matches,
+  run `xcodebuild -downloadPlatform iOS` (about 8.5 GB).
+- The deployment targets are 26.0 (current OS minus one; Liquid Glass needs 26). APIs new in 27
+  need `#available(iOS 27, ...)`: the extra large portrait widget family (`SitWidget.swift`) and
+  the audio resumption notification (`Bell.swift` keeps the old interruption handler for 26).
+  Building for a generic destination shows these errors. The 26.2 and 26.5 runtimes run the
+  apps (`id=<udid>` destinations; `OS=latest` picks 27).
 - Two simulators can share the name "iPhone 17" (one per runtime). The scripts pass `OS=latest`
   to pick the newest one.
 - The iOS scheme builds the embedded watch app, so it needs the watchOS simulator runtime too:
@@ -147,7 +151,11 @@ grains of sand on old paper (`Starfield.swift`, one `Palette` per scheme; `Glass
   images, 400x240 (@1x, @2x) and 1280x768. The two layers are `stars.svg` on black (Back) and
   `hole.svg` (Front) from `AppIcon.icon/Assets`, rendered with `rsvg-convert` at the square size
   and cropped to height with `sips -c`. `ASSETCATALOG_COMPILER_APPICON_NAME` on the TV target
-  names the brandassets. Top Shelf images are not provided.
+  names the brandassets. The Top Shelf images (1920x720 and wide 2320x720, @1x and @2x, flat)
+  are one SVG: `stars.svg` scaled to 1.6 times the height on black, the `hole.svg` circle over
+  it, rendered with `rsvg-convert`. App Store validation needs both.
+- Archiving the TV app with automatic signing fails ("Your team has no devices") until an Apple
+  TV is registered in the developer account: automatic signing wants a development profile first.
 - `xcrun simctl ui <tv udid> appearance light` fails on the tvOS simulator ("Runtime does not
   support userInterfaceStyle"); the TV light palette has only been checked on the iPhone. There
   is no CLI for the Siri Remote either: `osascript` key codes to the Simulator app do it
