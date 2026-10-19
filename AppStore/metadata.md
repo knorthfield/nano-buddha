@@ -58,7 +58,7 @@ iOS (iPhone, iPad), watchOS (in the iOS app), tvOS and macOS, one universal purc
 - Privacy policy: https://github.com/knorthfield/nano-buddha/blob/main/PRIVACY.md
 
 ## Price
-Free
+£0.99, base territory United Kingdom (Apple sets the other territories).
 
 ## Age rating
 All answers "None" / "No". Result: 4+.
