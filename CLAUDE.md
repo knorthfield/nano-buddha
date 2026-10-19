@@ -251,6 +251,26 @@ BigSoundBank serves HTML to plain curl; the
   app's hierarchy, identifier `UIA.Health.DoNotAllow.Button`), then checks Done and History, and that Copy week puts the week log on the pasteboard.
   A second test ends the sit from the expanded Dynamic Island.
 
+## App Store
+- `AppStore/metadata.md` holds the store text and review notes; `PRIVACY.md` is the privacy
+  policy URL (on GitHub, so it must be pushed). Version and build number are `MARKETING_VERSION`
+  and `CURRENT_PROJECT_VERSION` at project level in `project.yml`; bump the build for every upload.
+- `AppStore/screenshots/<platform>/` sizes: iPhone 1320x2868 (iPhone 18 Pro Max), iPad 2064x2752
+  (iPad Pro 13-inch), watch 416x496 (Series 12 46mm), TV 3840x2160, Mac 2560x1600. No alpha:
+  App Store Connect refuses it, and `screencapture` and watch `simctl io` PNGs have it.
+- How they were made: a sample `store.json` copied into the simulator's group container (it exists
+  only after the first launch; TV: the data container's `Documents`), `simctl status_bar
+  override`, and a throwaway UI test that adds `XCTAttachment`s with `lifetime = .keepAlways`
+  (exported with `xcresulttool export attachments`). Apple TV needs a throwaway tvOS UI-test
+  target (`XCUIRemote`): Xcode 27 has no Simulator.app to send keys to (DeviceHub has no windows).
+  The watch opens on the sit screen from a `sitRequest` file (no trailing newline, or
+  `TimeInterval` fails to parse it); its status bar shows a red "iPhone disconnected" glyph even
+  when paired, painted out afterwards.
+- Never seed sample sits into the Mac app: it syncs them to the real iCloud store and every
+  device. The Mac shots come from a copy built with another bundle id, ad-hoc signed, with no
+  entitlements (no iCloud, no sandbox). macOS also refuses the terminal any access to
+  `~/Library/Group Containers/<app group>`, and `CFFIXED_USER_HOME` does not move it.
+
 ## Git
 - Commits use the GitHub noreply address set in the repo-local git config. The GitHub account
   blocks pushes that expose the real email.
