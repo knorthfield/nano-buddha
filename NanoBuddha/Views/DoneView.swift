@@ -27,7 +27,7 @@ struct DoneView: View {
                 .glassEffect(.clear.tint(Color("GlassTint")), in: .circle)
             Text(session.completed ? "Session complete" : "Sit complete")
                 .font(titleFont)
-            Text("\(max(1, session.actualMinutes)) minutes")
+            Text("^[\(max(1, session.actualMinutes)) minute](inflect: true)")
                 .font(minutesFont)
                 .foregroundStyle(.secondary)
             #if !os(macOS) && !os(tvOS)

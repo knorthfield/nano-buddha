@@ -13,7 +13,7 @@ struct HomeView: View {
                 PrimaryButton(title: "Begin", action: onStart)
                 Spacer()
                 if !store.sessions.isEmpty {
-                    Text("\(store.sessions.count) sits · \(store.totalMinutes) minutes")
+                    Text("^[\(store.sessions.count) sit](inflect: true) · ^[\(store.totalMinutes) minute](inflect: true)")
                         .foregroundStyle(.secondary)
                 }
             }

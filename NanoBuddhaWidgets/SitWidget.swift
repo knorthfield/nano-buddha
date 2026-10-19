@@ -73,7 +73,7 @@ struct SitWidgetView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Label("Nano Buddha", systemImage: Self.symbol).font(.headline)
                     Text("\(entry.intendedMinutes) min next")
-                    Text("\(entry.weekSits) sits · \(entry.weekMinutes) min, 7 days").font(.caption)
+                    Text("^[\(entry.weekSits) sit](inflect: true) · \(entry.weekMinutes) min, 7 days").font(.caption)
                 }
             #endif
             default:
@@ -82,7 +82,7 @@ struct SitWidgetView: View {
                         .font(isExtraLarge ? .system(size: 80, weight: .bold) : .largeTitle.bold())
                         .monospacedDigit()
                     Spacer()
-                    Text("\(entry.weekSits) sits · \(entry.weekMinutes) min")
+                    Text("^[\(entry.weekSits) sit](inflect: true) · \(entry.weekMinutes) min")
                     Text("last 7 days").foregroundStyle(.secondary)
                 }
                 .font(isExtraLarge ? .largeTitle : .subheadline)
